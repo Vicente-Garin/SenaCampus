@@ -147,3 +147,9 @@ vite.config.ts.timestamp-*
 
 # Turbo Repo
 .turbo
+# Subcarpetas monorepo (server y mobile)
+**/node_modules/
+**/.env
+**/.env.*
+.expo/
+**/dist/
