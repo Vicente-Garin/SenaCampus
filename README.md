@@ -1,4 +1,4 @@
-﻿# SeñaCampus 🤟🎓
+﻿# SeñaCampus 
 > **Traductor de Lengua Oral a Lengua de Señas Chilena (LSCh) en Tiempo Real para Contextos Académicos**
 > *Universidad de Los Lagos — Departamento de Ciencias de la Ingeniería (Sede Chiloé)*
 > **Carrera:** Ingeniería Civil en Informática | **Asignatura:** Tecnologías Web y Móviles
@@ -6,14 +6,14 @@
 
 ---
 
-## 📌 Descripción del Proyecto
+##  Descripción del Proyecto
 **SeñaCampus** es una solución móvil diseñada para derribar las barreras de accesibilidad y comunicación que enfrentan los estudiantes sordos en entornos de educación superior. El sistema captura la voz del docente o emisor durante una cátedra, procesa y normaliza el discurso oral eliminando palabras vacías (*stopwords*) de acuerdo a las pautas de la LSCh, y renderiza dinámicamente una secuencia ordenada de animaciones vectoriales (Lottie) o deletreo manual (*dactilología*) como tolerancia a fallos garantizada.
 
 ---
 
-## 🏛️ Arquitectura del Sistema (Monorepo)
+##  Arquitectura del Sistema (Monorepo)
 
-`	ext
+```text
 SenaCampus/
 ├── docker-compose.yml       # Orquestación de MongoDB persistente
 ├── .gitignore               # Exclusiones de seguridad (.env, node_modules)
@@ -38,7 +38,8 @@ SenaCampus/
         ├── navigation/      # Enrutamiento de navegación (Tabs/Stack)
         ├── screens/         # Vistas funcionales (auth, translation, dialog)
         └── services/        # Cliente HTTP de traducción (api.js)
-🚀 Estado Actual y Módulos Implementados
+
+ Estado Actual y Módulos Implementados
 1. Infraestructura y Base de Datos
 Orquestación en Contenedores: Servicio de base de datos MongoDB local desplegado y aislado mediante Docker Compose con volúmenes persistentes.
 
@@ -76,13 +77,13 @@ Docker Desktop
 Expo Go instalado en dispositivo móvil (Android / iOS)
 
 1. Iniciar Base de Datos y Backend
-Bash
+
 docker-compose up -d
 cd server
 npm install
 npm run dev
+
 2. Iniciar Aplicación Móvil
-Bash
 cd mobile
 npm install
 npx expo start
