@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/db');
+const translationRoutes = require('./routes/translationRoutes');
 
 const app = express();
 
@@ -12,7 +13,10 @@ app.use(express.json());
 // Conexión a MongoDB
 connectDB();
 
-// Ruta de prueba
+// Rutas de la API
+app.use('/api/v1/traductor', translationRoutes);
+
+// Comprobación de salud
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'ok', service: 'SeñaCampus Backend' });
 });
