@@ -3,7 +3,8 @@ import { Platform } from 'react-native';
 const LOCAL_IP = '192.168.1.13';
 
 const BASE_URL = Platform.select({
-  android: 'http://10.0.2.2:5000/api/v1',
+  android: `http://${LOCAL_IP}:5000/api/v1`,
+  ios: `http://${LOCAL_IP}:5000/api/v1`,
   default: `http://${LOCAL_IP}:5000/api/v1`
 });
 
