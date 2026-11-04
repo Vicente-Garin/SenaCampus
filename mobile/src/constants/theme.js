@@ -1,45 +1,60 @@
 export const COLORS = {
-  // Paleta principal Figma (SeñaCampus)
-  coral: '#D14426',         // Color acento primario (botones principales, destacados)
-  coralLight: '#FBECE8',    // Fondo suave para chips y elementos activos
-  menta: '#4ECDC4',         // Acento secundario (estado activo, éxito)
-  mentaLight: '#E8F8F7',
-  durazno: '#F7A072',       // Acento cálido (avisos, tags de categoría)
-  crema: '#FAF9F6',         // Fondo general de la app (neutral background)
-  blanco: '#FFFFFF',
-
-  // Escala neutra para textos y bordes
-  textoPrincipal: '#1E293B', // Slate 800 (títulos y texto legible)
-  textoSecundario: '#64748B',// Slate 500 (subtítulos, metadatos)
-  borde: '#E2E8F0',          // Slate 200 (separadores de tarjetas)
-  superficie: '#FFFFFF',     // Fondo de tarjetas y cards
-
-  // Estados
-  error: '#EF4444',
-  success: '#10B981'
+  background: '#FBF5EE',
+  surface: '#FFFFFF',
+  card: '#FFFFFF',
+  cardBackground: '#FFFFFF',
+  primary: '#C84626',
+  primaryLight: '#F3E8DB',
+  text: '#1C1917',
+  textDark: '#1C1917',
+  textSecondary: '#706E6B',
+  textMuted: '#706E6B',
+  border: '#E8E1D7',
+  cardPeach: '#FAD9CF',
+  cardYellow: '#F9D87E',
+  cardGreen: '#BAE6D8',
 };
 
-export const SPACING = {
-  xs: 4,
-  sm: 8,
+export const SIZES = {
+  radius: 16,
+  padding: 20,
+  xs: 8,
+  sm: 12,
   md: 16,
-  lg: 24,
-  xl: 32
+  lg: 20,
+  xl: 24,
+  xxl: 32,
+  card: 16,
 };
 
-export const FONTS = {
-  regular: 'Nunito-Regular',
-  medium: 'Nunito-Medium',
-  bold: 'Nunito-Bold',
-  semiBold: 'Nunito-SemiBold'
-};
+export const SPACING = SIZES;
 
 export const SHADOWS = {
   card: {
-    shadowColor: '#000',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.08,
     shadowRadius: 8,
-    elevation: 2
-  }
+    elevation: 3,
+  },
+  light: {
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
 };
+
+const theme = {
+  colors: COLORS,
+  sizes: SIZES,
+  spacing: SPACING,
+  shadows: SHADOWS,
+  COLORS,
+  SIZES,
+  SPACING,
+  SHADOWS,
+};
+
+export default theme;
