@@ -18,7 +18,9 @@
       }
     },
     "plugins": [
-      "expo-status-bar"
-    ]
+      "expo-status-bar",
+      "expo-router"
+    ],
+    "scheme": "senacampus"
   }
 }
