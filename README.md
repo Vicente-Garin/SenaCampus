@@ -1,89 +1,68 @@
-﻿# SeñaCampus 
-> **Traductor de Lengua Oral a Lengua de Señas Chilena (LSCh) en Tiempo Real para Contextos Académicos**
-> *Universidad de Los Lagos — Departamento de Ciencias de la Ingeniería (Sede Chiloé)*
-> **Carrera:** Ingeniería Civil en Informática | **Asignatura:** Tecnologías Web y Móviles
-> **Autor:** Vicente Martín Garín Pereda — Octubre 2026
+﻿# SeñaCampus — Asistente Móvil de Interpretación Académica en Tiempo Real
+
+Aplicación móvil desarrollada en **React Native con Expo (SDK 58)** para apoyar la inclusión de estudiantes sordos o hipoacúsicos en aulas universitarias, traduciendo en tiempo real la explicación del docente a glosas y señas de **Lengua de Señas Chilena (LSCh)** junto con subtítulos estructurados por asignatura.
+
+> **Proyecto Académico:** Avance N°1 — Diseño UI/UX y Frontend Móvil  
+> **Asignatura:** Tecnologías Web y Móviles (6º semestre) — Ingeniería Civil en Informática, Universidad de Los Lagos  
+> **Autor:** Vicente Martín Garín Pereda
 
 ---
 
-##  Descripción del Proyecto
-**SeñaCampus** es una solución móvil diseñada para derribar las barreras de accesibilidad y comunicación que enfrentan los estudiantes sordos en entornos de educación superior. El sistema captura la voz del docente o emisor durante una cátedra, procesa y normaliza el discurso oral eliminando palabras vacías (*stopwords*) de acuerdo a las pautas de la LSCh, y renderiza dinámicamente una secuencia ordenada de animaciones vectoriales (Lottie) o deletreo manual (*dactilología*) como tolerancia a fallos garantizada.
+## Documentación y Entregables del Avance N°1
+
+* **Bitácora de Diseño y Frontend:** [docs/bitacora.md](./docs/bitacora.md)
+* **Prototipo Interactivo en Figma:** *(Agregar enlace público de Figma aquí)*
 
 ---
 
-##  Arquitectura del Sistema (Monorepo)
+## Stack Tecnológico
 
-```text
-SenaCampus/
-├── docker-compose.yml       # Orquestación de MongoDB persistente
-├── .gitignore               # Exclusiones de seguridad (.env, node_modules)
-├── README.md                # Documentación del proyecto
-├── server/                  # Backend: Node.js, Express, Mongoose
-│   ├── scripts/             # Scripts de siembra (seedDictionary.js)
-│   └── src/
-│       ├── config/          # Conexión asíncrona a la base de datos (db.js)
-│       ├── controllers/     # Lógica del traductor y ventana deslizante
-│       ├── models/          # Esquemas Mongoose (Gloss.js, Session.js)
-│       ├── routes/          # Rutas REST (/api/v1/traductor)
-│       ├── utils/           # Normalizador y filtro de stopwords (textParser.js)
-│       └── server.js        # Punto de entrada de la API Express
-└── mobile/                  # Frontend: React Native con Expo SDK
-    ├── assets/              # Tipografías (Nunito) y señas (Lottie/Alphabet)
-    ├── app.json             # Manifiesto de Expo
-    ├── package.json         # Dependencias móviles
-    ├── App.js               # Punto de entrada y montaje de interfaz
+* **Framework Móvil:** React Native + Expo SDK 58
+* **Enrutamiento:** Expo Router (`src/app/` con layouts anidados, pestañas y rutas dinámicas `[id]` y `[sessionId]`)
+* **Gestión de Estado:** React Context API (`SubjectsContext`) + Hooks (`useState`, `useEffect`)
+* **Componentes Nativos y Accesibilidad:** `FlatList`, `Pressable` (áreas táctiles >= 48 dp), `SafeAreaView`, `useSafeAreaInsets`, `TextInput` controlado, tokens de contraste WCAG AA (`src/constants/theme.js`)
+
+---
+
+## Estructura del Proyecto Móvil (`mobile/`)
+
+    mobile/
+    ├── app.json
+    ├── package.json
     └── src/
-        ├── components/      # Visor gestual (SignViewer.jsx)
-        ├── constants/       # Tokens de diseño y colores Figma (theme.js)
-        ├── navigation/      # Enrutamiento de navegación (Tabs/Stack)
-        ├── screens/         # Vistas funcionales (auth, translation, dialog)
-        └── services/        # Cliente HTTP de traducción (api.js)
+        ├── app/
+        │   ├── _layout.jsx              # Stack principal y proveedor de contexto
+        │   ├── index.jsx                # Acceso institucional
+        │   ├── ajustes.jsx              # Configuración de accesibilidad
+        │   ├── asignatura/[id].jsx      # Clases guardadas por asignatura
+        │   ├── sesion/[sessionId].jsx   # Lectura organizada de clase guardada
+        │   └── (tabs)/
+        │       ├── _layout.jsx          # Navegación inferior por pestañas
+        │       ├── index.jsx            # Listado y creación de asignaturas
+        │       ├── traducir.jsx         # Cátedra en vivo (Voz docente -> LSCh)
+        │       └── dialogo.jsx          # Comunicación rápida estudiante <-> docente
+        ├── components/
+        │   └── ScreenHeader.jsx         # Cabecera reutilizable con botón Volver
+        ├── constants/
+        │   └── theme.js                 # Paleta WCAG AA, tipografía y espaciados
+        ├── context/
+        │   └── SubjectsContext.jsx      # Estado global de asignaturas y sesiones
+        └── data/
+            └── mockData.js              # Datos realistas del dominio universitario
 
- Estado Actual y Módulos Implementados
-1. Infraestructura y Base de Datos
-Orquestación en Contenedores: Servicio de base de datos MongoDB local desplegado y aislado mediante Docker Compose con volúmenes persistentes.
+---
 
-Corpus Oficial LSCh (2.098 Términos): Base de datos poblada a partir de los Tomos I y II del Diccionario Bilingüe Lengua de Señas Chilena - Español (MINEDUC/UMCE), discriminando señas núcleo con recurso visual directo y señas con derivación dactilológica.
+## Requisitos y Ejecución Local
 
-2. Motor Semántico de Traducción (Backend)
-Normalización UTF-8 & Stopwords: Algoritmo en textParser.js que elimina puntuaciones, normaliza caracteres acentuados y remueve palabras funcionales del español que no se señan en la gramática LSCh (el, la, de, en, hay, etc.).
+### Requisitos Previos
+* **Node.js:** v18 o superior (recomendado v20 LTS)
+* **Expo Go:** Instalado en dispositivo físico Android o iOS (compatible con SDK 58/57)
 
-Ventana Deslizante (N-Gramas): El controlador analiza combinaciones de múltiples palabras antes de términos individuales, reconociendo locuciones compuestas como "sala de clases".
-
-Endpoint REST Funcional: POST /api/v1/traductor/parse responde con la secuencia estructurada de glosas y la descomposición dactilológica por arreglos de caracteres.
-
-3. Cliente Móvil (Frontend Expo)
-Design Tokens: Centralización de paleta cromática (Coral #D14426, Menta #4ECDC4, Durazno, Crema) y tipografía Nunito según especificaciones en Figma.
-
-Componente SignViewer: Visor interactivo con gestión de colas FIFO, renderizado condicional de animaciones, transiciones letra a letra para dactilología y controles de velocidad (1x, 1.5x) y pausa.
-
-🛠️ Stack Tecnológico
-Frontend Móvil: React Native, Expo, React Native Screens & Safe Area Context.
-
-Backend API: Node.js, Express.js, CORS, Dotenv.
-
-Base de Datos & ORM: MongoDB, Mongoose ODM.
-
-Infraestructura: Docker, Docker Compose, Git / GitHub.
-
-Diseño & Recursos: Figma, Lottie, Diccionario Oficial LSCh (MINEDUC/UMCE).
-
-⚙️ Guía de Ejecución Local
-Prerrequisitos
-Node.js (v18+)
-
-Docker Desktop
-
-Expo Go instalado en dispositivo móvil (Android / iOS)
-
-1. Iniciar Base de Datos y Backend
-
-docker-compose up -d
-cd server
-npm install
-npm run dev
-
-2. Iniciar Aplicación Móvil
-cd mobile
-npm install
-npx expo start
+### Pasos para Ejecutar
+1. **Clonar el repositorio:**
+   `git clone https://github.com/Vicente-Garin/SenaCampus.git && cd SenaCampus/mobile`
+2. **Instalar dependencias:**
+   `npm install`
+3. **Iniciar el servidor de desarrollo Expo:**
+   `npx expo start -c`
+4. **Abrir en el teléfono:** Escanea el código QR generado en la terminal utilizando la aplicación **Expo Go**.
