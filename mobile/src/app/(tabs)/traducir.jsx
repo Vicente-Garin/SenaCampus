@@ -2,7 +2,7 @@
 import { View, Text, Pressable, FlatList, StyleSheet, Modal, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { COLORS, TYPOGRAPHY, SIZES, SHADOWS } from '../../constants/theme';
+import { COLORS, TYPOGRAPHY, SIZES } from '../../constants/theme';
 import { LECTURE_SIMULATIONS } from '../../data/mockData';
 import { useSubjects } from '../../context/SubjectsContext';
 
@@ -11,24 +11,28 @@ export default function TraducirScreen() {
   const { subjectId } = useLocalSearchParams();
   const { subjects, saveSessionToSubject } = useSubjects();
 
-  const [isListening, setIsListening] = useState(false);
+  const [isListening, setIsListening] = useState(true);
+  const [speed, setSpeed] = useState('1x');
+  const [isRepeating, setIsRepeating] = useState(false);
   const [segmentIndex, setSegmentIndex] = useState(0);
   const [activeGlossIndex, setActiveGlossIndex] = useState(0);
   const [history, setHistory] = useState([LECTURE_SIMULATIONS[0]]);
 
-  const [saveModalVisible, setSaveModalVisible] = useState(false);
+  const [finishModalVisible, setFinishModalVisible] = useState(false);
   const [topicName, setTopicName] = useState('');
   const [selectedSubjectId, setSelectedSubjectId] = useState(subjectId || subjects[0]?.id);
+
+  const currentSubject = subjects.find((s) => s.id === selectedSubjectId) || subjects[0];
+  const currentSegment = LECTURE_SIMULATIONS[segmentIndex];
+  const currentSign = currentSegment.glosses[activeGlossIndex] || currentSegment.glosses[0];
 
   useEffect(() => {
     if (subjectId) setSelectedSubjectId(subjectId);
   }, [subjectId]);
 
-  const currentSegment = LECTURE_SIMULATIONS[segmentIndex];
-  const currentSign = currentSegment.glosses[activeGlossIndex] || currentSegment.glosses[0];
-
   useEffect(() => {
     if (!isListening) return;
+    const intervalMs = speed === '1x' ? 4500 : 2500;
     const timer = setInterval(() => {
       setSegmentIndex((prev) => {
         const next = (prev + 1) % LECTURE_SIMULATIONS.length;
@@ -36,35 +40,22 @@ export default function TraducirScreen() {
         setHistory((h) => [LECTURE_SIMULATIONS[next], ...h]);
         return next;
       });
-    }, 4500);
+    }, intervalMs);
     return () => clearInterval(timer);
-  }, [isListening]);
+  }, [isListening, speed]);
 
-  const handleNextPhraseManual = () => {
-    const next = (segmentIndex + 1) % LECTURE_SIMULATIONS.length;
-    setSegmentIndex(next);
-    setActiveGlossIndex(0);
-    setHistory((h) => [LECTURE_SIMULATIONS[next], ...h]);
+  const handleRepeatSign = () => {
+    setIsRepeating(true);
+    setTimeout(() => setIsRepeating(false), 900);
   };
 
-  const handleAttemptBack = () => {
+  const handleOpenFinishModal = () => {
     setIsListening(false);
-    setSaveModalVisible(true);
-  };
-
-  const exitScreen = () => {
-    setSaveModalVisible(false);
-    setTopicName('');
-    setHistory([LECTURE_SIMULATIONS[0]]);
-    if (router.canGoBack()) {
-      router.back();
-    } else {
-      router.replace('/(tabs)');
-    }
+    setFinishModalVisible(true);
   };
 
   const handleConfirmSave = () => {
-    const targetId = selectedSubjectId || subjects[0]?.id;
+    const targetId = currentSubject?.id || subjects[0]?.id;
     const formattedSegments = [...history].reverse().map((item) => ({
       time: item.time,
       spoken: item.spoken,
@@ -72,11 +63,11 @@ export default function TraducirScreen() {
     }));
 
     saveSessionToSubject(targetId, {
-      topic: topicName || `Cátedra ${new Date().toLocaleDateString('es-CL')}`,
+      topic: topicName || `Clase del ${new Date().toLocaleDateString('es-CL', { day: 'numeric', month: 'long' })}`,
       segments: formattedSegments,
     });
 
-    setSaveModalVisible(false);
+    setFinishModalVisible(false);
     setTopicName('');
     setHistory([LECTURE_SIMULATIONS[0]]);
     router.replace({
@@ -85,54 +76,55 @@ export default function TraducirScreen() {
     });
   };
 
+  const handleContinueTranslating = () => {
+    setFinishModalVisible(false);
+    setIsListening(true);
+  };
+
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
       <View style={styles.container}>
         <View style={styles.header}>
-          <Pressable
-            style={({ pressed }) => [styles.backBtn, pressed && styles.pressed]}
-            onPress={handleAttemptBack}
-          >
-            <Text style={styles.backIcon}>‹</Text>
-            <Text style={styles.backText}>Volver</Text>
+          <Pressable style={styles.backBtn} onPress={handleOpenFinishModal}>
+            <Text style={styles.backText}>‹ Volver</Text>
           </Pressable>
+          <Text style={styles.headerTitle} numberOfLines={1}>
+            {currentSubject?.title || 'Tecnologías Web y Móviles'}
+          </Text>
+        </View>
 
-          <View style={styles.titleBlock}>
-            <Text style={styles.title} numberOfLines={1}>Clase Nueva en Vivo</Text>
-            <Text style={styles.subtitle} numberOfLines={1}>Voz docente → LSCh</Text>
+        <View style={styles.livePillRow}>
+          <View style={[styles.livePill, !isListening && { backgroundColor: COLORS.textSecondary }]}>
+            <Text style={styles.livePillText}>
+              {isListening ? '🎙️ Escuchando · es-CL' : '⏸️ En pausa · es-CL'}
+            </Text>
           </View>
+        </View>
 
-          <View
-            style={[
-              styles.statusBadge,
-              { backgroundColor: isListening ? COLORS.successLight : COLORS.primaryLight },
-            ]}
+        <View style={[styles.viewerCard, isRepeating && styles.viewerCardRepeat]}>
+          <Text style={styles.avatarEmoji}>🧑🏽‍🏫</Text>
+          <View style={styles.signBadge}>
+            <Text style={styles.signBadgeText}>
+              {isRepeating ? `↻ Repitiendo · ${currentSign.glosa}` : `Seña · ${currentSign.glosa}`}
+            </Text>
+          </View>
+          <Text style={styles.signDesc}>{currentSign.mano}</Text>
+        </View>
+
+        <View style={styles.utilityRow}>
+          <Pressable style={styles.utilityBtn} onPress={handleRepeatSign}>
+            <Text style={styles.utilityText}>↻ Repetir seña</Text>
+          </Pressable>
+          <Pressable
+            style={styles.utilityBtn}
+            onPress={() => setSpeed((s) => (s === '1x' ? '1.5x' : '1x'))}
           >
-            <Text
-              style={[
-                styles.statusText,
-                { color: isListening ? COLORS.success : COLORS.primary },
-              ]}
-            >
-              {isListening ? '● Grabando' : '● Pausa'}
-            </Text>
-          </View>
+            <Text style={styles.utilityText}>⏱ Velocidad {speed}</Text>
+          </Pressable>
         </View>
 
-        <View style={styles.viewerCard}>
-          <View style={styles.viewerTop}>
-            <Text style={styles.categoryTag}>{currentSign.categoria}</Text>
-            <Text style={styles.stepCounter}>
-              Seña {activeGlossIndex + 1} de {currentSegment.glosses.length}
-            </Text>
-          </View>
-          <Text style={styles.signEmoji}>🤟</Text>
-          <Text style={styles.glosaTitle}>{currentSign.glosa}</Text>
-          <Text style={styles.glosaDesc}>{currentSign.mano}</Text>
-        </View>
-
-        <Text style={styles.sectionLabel}>Glosas de la frase actual:</Text>
-        <View style={{ height: 52, marginBottom: 10 }}>
+        <Text style={styles.sectionLabel}>PRÓXIMAS SEÑAS</Text>
+        <View style={{ height: 48, marginBottom: 10 }}>
           <FlatList
             horizontal
             data={currentSegment.glosses}
@@ -151,93 +143,46 @@ export default function TraducirScreen() {
           />
         </View>
 
-        <Text style={styles.sectionLabel}>Transcripción capturada ({history.length} bloques):</Text>
-        <FlatList
-          data={history}
-          keyExtractor={(item, idx) => `${item.id}-${idx}`}
-          style={{ flex: 1, marginBottom: 10 }}
-          showsVerticalScrollIndicator={false}
-          renderItem={({ item, index }) => (
-            <View style={[styles.transcriptCard, index === 0 && styles.transcriptActive]}>
-              <Text style={styles.transcriptTime}>Docente · {item.time}</Text>
-              <Text style={styles.transcriptText}>"{item.spoken}"</Text>
-            </View>
-          )}
-        />
+        <View style={styles.captionBox}>
+          <Text style={styles.captionText}>"...{currentSegment.spoken}"</Text>
+        </View>
 
-        <View style={styles.btnRow}>
+        <View style={styles.bottomRow}>
           <Pressable
-            style={({ pressed }) => [
-              styles.primaryBtn,
-              isListening && styles.stopBtn,
-              pressed && styles.pressed,
-            ]}
+            style={[styles.pauseBtn, !isListening && { backgroundColor: COLORS.secondary }]}
             onPress={() => setIsListening(!isListening)}
           >
-            <Text style={styles.primaryBtnText}>
-              {isListening ? 'Pausar Escucha' : 'Escuchar Profesor'}
-            </Text>
+            <Text style={styles.pauseBtnText}>{isListening ? '⏸ Pausar' : '▶ Reanudar'}</Text>
           </Pressable>
 
-          <Pressable
-            style={({ pressed }) => [styles.secondaryBtn, pressed && styles.pressed]}
-            onPress={handleNextPhraseManual}
-          >
-            <Text style={styles.secondaryBtnText}>Siguiente ›</Text>
+          <Pressable style={styles.finishBtn} onPress={handleOpenFinishModal}>
+            <Text style={styles.finishBtnText}>⏹ Terminar</Text>
           </Pressable>
         </View>
 
-        <Modal visible={saveModalVisible} transparent animationType="fade">
+        <Modal visible={finishModalVisible} transparent animationType="fade">
           <View style={styles.modalOverlay}>
             <View style={styles.modalCard}>
-              <Text style={styles.modalTitle}>¿Quieres guardar esta clase?</Text>
+              <Text style={styles.modalTitle}>¿Terminar la clase?</Text>
               <Text style={styles.modalSub}>
-                Se guardará el texto organizado y las glosas para que puedas repasarlas luego.
+                Guardaremos la transcripción en {currentSubject?.title}.
               </Text>
 
-              <Text style={styles.inputLabel}>Tema de la clase:</Text>
               <TextInput
                 style={styles.input}
-                placeholder="Ej: Clase 4 - Navegación Móvil"
+                placeholder="Título opcional (ej: Clase del 19 de noviembre)"
                 placeholderTextColor={COLORS.textMuted}
                 value={topicName}
                 onChangeText={setTopicName}
               />
 
-              <Text style={styles.inputLabel}>Asignatura destino:</Text>
-              <View style={{ maxHeight: 130, marginBottom: 14 }}>
-                <FlatList
-                  data={subjects}
-                  keyExtractor={(item) => item.id}
-                  renderItem={({ item }) => (
-                    <Pressable
-                      style={[
-                        styles.subjectOption,
-                        selectedSubjectId === item.id && styles.subjectOptionActive,
-                      ]}
-                      onPress={() => setSelectedSubjectId(item.id)}
-                    >
-                      <Text
-                        style={[
-                          styles.subjectOptionText,
-                          selectedSubjectId === item.id && styles.subjectOptionTextActive,
-                        ]}
-                      >
-                        {item.title}
-                      </Text>
-                    </Pressable>
-                  )}
-                />
-              </View>
+              <Pressable style={styles.confirmSaveBtn} onPress={handleConfirmSave}>
+                <Text style={styles.confirmSaveText}>Sí, terminar y guardar</Text>
+              </Pressable>
 
-              <View style={styles.modalActions}>
-                <Pressable style={styles.discardBtn} onPress={exitScreen}>
-                  <Text style={styles.discardText}>Descartar</Text>
-                </Pressable>
-                <Pressable style={styles.saveBtn} onPress={handleConfirmSave}>
-                  <Text style={styles.saveText}>Guardar clase</Text>
-                </Pressable>
-              </View>
+              <Pressable style={styles.continueBtn} onPress={handleContinueTranslating}>
+                <Text style={styles.continueText}>Seguir traduciendo</Text>
+              </Pressable>
             </View>
           </View>
         </Modal>
@@ -249,106 +194,109 @@ export default function TraducirScreen() {
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: COLORS.background },
   container: { flex: 1, paddingHorizontal: SIZES.padding, paddingTop: 8, paddingBottom: 12 },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, gap: 10 },
+  header: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 },
   backBtn: {
     minHeight: SIZES.touchMin,
-    minWidth: SIZES.touchMin,
     paddingHorizontal: 12,
+    justifyContent: 'center',
     backgroundColor: COLORS.surface,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: COLORS.border,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
   },
-  backIcon: { fontSize: 22, fontWeight: 'bold', color: COLORS.primary, lineHeight: 24 },
-  backText: { fontSize: TYPOGRAPHY.body, fontWeight: 'bold', color: COLORS.primary },
-  titleBlock: { flex: 1 },
-  title: { fontSize: TYPOGRAPHY.h3, fontWeight: 'bold', color: COLORS.textDark },
-  subtitle: { fontSize: TYPOGRAPHY.caption, color: COLORS.textSecondary },
-  statusBadge: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 16 },
-  statusText: { fontSize: TYPOGRAPHY.caption, fontWeight: 'bold' },
+  backText: { fontSize: TYPOGRAPHY.body, fontWeight: 'bold', color: COLORS.secondary },
+  headerTitle: { flex: 1, fontSize: TYPOGRAPHY.h3, fontWeight: 'bold', color: COLORS.textDark },
+  livePillRow: { alignItems: 'flex-start', marginBottom: 10 },
+  livePill: { backgroundColor: COLORS.secondary, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20 },
+  livePillText: { color: COLORS.surface, fontSize: TYPOGRAPHY.caption, fontWeight: 'bold' },
   viewerCard: {
-    backgroundColor: COLORS.surface,
+    backgroundColor: '#FAD7B8',
     borderRadius: 20,
-    padding: 16,
+    padding: 18,
     alignItems: 'center',
+    marginBottom: 12,
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  viewerCardRepeat: {
+    borderColor: COLORS.secondary,
+    backgroundColor: '#F6C8A0',
+  },
+  avatarEmoji: { fontSize: 54, marginBottom: 6 },
+  signBadge: {
+    backgroundColor: COLORS.surface,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 16,
+    marginBottom: 6,
+  },
+  signBadgeText: { color: COLORS.secondary, fontSize: TYPOGRAPHY.caption, fontWeight: 'bold' },
+  signDesc: { fontSize: TYPOGRAPHY.caption, color: COLORS.textDark, textAlign: 'center' },
+  utilityRow: { flexDirection: 'row', gap: 10, marginBottom: 12 },
+  utilityBtn: {
+    flex: 1,
+    minHeight: SIZES.touchMin,
+    backgroundColor: COLORS.surface,
+    borderRadius: 24,
     borderWidth: 1,
     borderColor: COLORS.border,
-    marginBottom: 12,
-    ...SHADOWS.card,
-  },
-  viewerTop: { width: '100%', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
-  categoryTag: {
-    backgroundColor: COLORS.primaryLight,
-    color: COLORS.primary,
-    fontSize: TYPOGRAPHY.caption,
-    fontWeight: 'bold',
+    justifyContent: 'center',
+    alignItems: 'center',
     paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 10,
   },
-  stepCounter: { fontSize: TYPOGRAPHY.caption, color: COLORS.textSecondary, fontWeight: '600' },
-  signEmoji: { fontSize: 42, marginVertical: 2 },
-  glosaTitle: { fontSize: TYPOGRAPHY.h2, fontWeight: 'bold', color: COLORS.textDark, marginBottom: 4 },
-  glosaDesc: { fontSize: TYPOGRAPHY.body, color: COLORS.textSecondary, textAlign: 'center', lineHeight: 22 },
-  sectionLabel: { fontSize: TYPOGRAPHY.caption, fontWeight: 'bold', color: COLORS.textDark, marginBottom: 6 },
+  utilityText: { fontSize: TYPOGRAPHY.caption, fontWeight: '700', color: COLORS.textDark },
+  sectionLabel: { fontSize: TYPOGRAPHY.caption, fontWeight: 'bold', color: COLORS.textSecondary, marginBottom: 6 },
   chip: {
-    minHeight: SIZES.touchMin,
-    paddingHorizontal: 14,
+    minHeight: 44,
+    paddingHorizontal: 16,
     backgroundColor: COLORS.surface,
-    borderRadius: 12,
+    borderRadius: 22,
     borderWidth: 1,
     borderColor: COLORS.border,
     justifyContent: 'center',
     marginRight: 8,
   },
-  chipActive: { backgroundColor: COLORS.primary, borderColor: COLORS.primary },
-  chipText: { fontSize: TYPOGRAPHY.body, fontWeight: '600', color: COLORS.textDark },
+  chipActive: { backgroundColor: COLORS.secondary, borderColor: COLORS.secondary },
+  chipText: { fontSize: TYPOGRAPHY.caption, fontWeight: 'bold', color: COLORS.textDark },
   chipTextActive: { color: COLORS.surface },
-  transcriptCard: {
+  captionBox: {
+    flex: 1,
     backgroundColor: COLORS.surface,
-    padding: 12,
-    borderRadius: 12,
+    borderRadius: 16,
+    padding: 14,
     borderWidth: 1,
     borderColor: COLORS.border,
-    marginBottom: 8,
+    justifyContent: 'center',
+    marginBottom: 12,
   },
-  transcriptActive: { borderLeftWidth: 4, borderLeftColor: COLORS.primary },
-  transcriptTime: { fontSize: TYPOGRAPHY.caption, color: COLORS.secondary, fontWeight: 'bold', marginBottom: 2 },
-  transcriptText: { fontSize: TYPOGRAPHY.body, color: COLORS.textDark, lineHeight: 22 },
-  btnRow: { flexDirection: 'row', gap: 10, paddingTop: 4 },
-  primaryBtn: {
-    flex: 1.4,
+  captionText: { fontSize: TYPOGRAPHY.body, color: COLORS.textDark, lineHeight: 22 },
+  bottomRow: { flexDirection: 'row', gap: 12 },
+  pauseBtn: {
+    flex: 1,
     minHeight: SIZES.touchMin,
     backgroundColor: COLORS.primary,
-    borderRadius: 12,
+    borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 12,
   },
-  stopBtn: { backgroundColor: COLORS.secondary },
-  primaryBtnText: { fontSize: TYPOGRAPHY.body, fontWeight: 'bold', color: COLORS.surface },
-  secondaryBtn: {
+  pauseBtnText: { color: COLORS.surface, fontSize: TYPOGRAPHY.body, fontWeight: 'bold' },
+  finishBtn: {
     flex: 1,
     minHeight: SIZES.touchMin,
     backgroundColor: COLORS.surface,
+    borderRadius: 14,
     borderWidth: 1.5,
-    borderColor: COLORS.primary,
-    borderRadius: 12,
+    borderColor: COLORS.border,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 12,
   },
-  secondaryBtnText: { fontSize: TYPOGRAPHY.body, fontWeight: 'bold', color: COLORS.primary },
-  pressed: { opacity: 0.85 },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 20 },
-  modalCard: { backgroundColor: COLORS.surface, borderRadius: 20, padding: 22 },
-  modalTitle: { fontSize: TYPOGRAPHY.h2, fontWeight: 'bold', color: COLORS.textDark, marginBottom: 6 },
-  modalSub: { fontSize: TYPOGRAPHY.caption, color: COLORS.textSecondary, marginBottom: 14, lineHeight: 20 },
-  inputLabel: { fontSize: TYPOGRAPHY.caption, fontWeight: 'bold', color: COLORS.textDark, marginBottom: 6 },
+  finishBtnText: { color: COLORS.textDark, fontSize: TYPOGRAPHY.body, fontWeight: 'bold' },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 24 },
+  modalCard: { backgroundColor: COLORS.surface, borderRadius: 24, padding: 24, alignItems: 'center' },
+  modalTitle: { fontSize: TYPOGRAPHY.h2, fontWeight: 'bold', color: COLORS.textDark, marginBottom: 8 },
+  modalSub: { fontSize: TYPOGRAPHY.body, color: COLORS.textSecondary, textAlign: 'center', marginBottom: 16 },
   input: {
+    width: '100%',
     minHeight: SIZES.touchMin,
     backgroundColor: COLORS.background,
     borderWidth: 1,
@@ -357,29 +305,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     fontSize: TYPOGRAPHY.body,
     color: COLORS.textDark,
-    marginBottom: 12,
+    marginBottom: 16,
   },
-  subjectOption: {
-    minHeight: 44,
-    paddingHorizontal: 12,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    justifyContent: 'center',
-    marginBottom: 6,
-  },
-  subjectOptionActive: { backgroundColor: COLORS.primaryLight, borderColor: COLORS.primary },
-  subjectOptionText: { fontSize: TYPOGRAPHY.caption, color: COLORS.textDark, fontWeight: '600' },
-  subjectOptionTextActive: { color: COLORS.primary, fontWeight: 'bold' },
-  modalActions: { flexDirection: 'row', justifyContent: 'flex-end', gap: 12, marginTop: 4 },
-  discardBtn: { minHeight: SIZES.touchMin, justifyContent: 'center', paddingHorizontal: 14 },
-  discardText: { fontSize: TYPOGRAPHY.body, color: COLORS.error, fontWeight: '600' },
-  saveBtn: {
+  confirmSaveBtn: {
+    width: '100%',
     minHeight: SIZES.touchMin,
     backgroundColor: COLORS.primary,
-    borderRadius: 12,
+    borderRadius: 14,
     justifyContent: 'center',
-    paddingHorizontal: 20,
+    alignItems: 'center',
+    marginBottom: 10,
   },
-  saveText: { fontSize: TYPOGRAPHY.body, color: COLORS.surface, fontWeight: 'bold' },
+  confirmSaveText: { color: COLORS.surface, fontSize: TYPOGRAPHY.body, fontWeight: 'bold' },
+  continueBtn: { minHeight: SIZES.touchMin, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 16 },
+  continueText: { color: COLORS.secondary, fontSize: TYPOGRAPHY.body, fontWeight: 'bold' },
 });

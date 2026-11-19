@@ -11,7 +11,7 @@ Aplicación móvil desarrollada en **React Native con Expo (SDK 58)** para apoya
 ## Documentación y Entregables del Avance N°1
 
 * **Bitácora de Diseño y Frontend:** [docs/bitacora.md](./docs/bitacora.md)
-* **Prototipo Interactivo en Figma:** *(Agregar enlace público de Figma aquí)*
+* **Prototipo Interactivo en Figma:** [Abrir Prototipo en Figma](https://www.figma.com/design/bCv8y8gXMaHy6oLUagS4PI/se%C3%B1aCampus?node-id=3-362&t=3c6s7hihCM2XMi2I-1)
 
 ---
 
@@ -66,3 +66,5 @@ Aplicación móvil desarrollada en **React Native con Expo (SDK 58)** para apoya
 3. **Iniciar el servidor de desarrollo Expo:**
    `npx expo start -c`
 4. **Abrir en el teléfono:** Escanea el código QR generado en la terminal utilizando la aplicación **Expo Go**.
+
+
