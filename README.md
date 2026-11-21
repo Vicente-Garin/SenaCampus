@@ -1,70 +1,83 @@
-﻿# SeñaCampus — Asistente Móvil de Interpretación Académica en Tiempo Real
+# SeñaCampus — Asistente Móvil de Interpretación Académica en Tiempo Real
 
-Aplicación móvil desarrollada en **React Native con Expo (SDK 58)** para apoyar la inclusión de estudiantes sordos o hipoacúsicos en aulas universitarias, traduciendo en tiempo real la explicación del docente a glosas y señas de **Lengua de Señas Chilena (LSCh)** junto con subtítulos estructurados por asignatura.
+Aplicación móvil desarrollada en **React Native con Expo (SDK 58)** para apoyar la inclusión de estudiantes sordos o hipoacúsicos en aulas universitarias. Escucha la explicación del docente y la muestra en **Lengua de Señas Chilena (LSCh)** junto con subtítulos, organizada por asignatura. Es un apoyo: no reemplaza a un intérprete de LSCh.
 
-> **Proyecto Académico:** Avance N°1 — Diseño UI/UX y Frontend Móvil  
-> **Asignatura:** Tecnologías Web y Móviles (6º semestre) — Ingeniería Civil en Informática, Universidad de Los Lagos  
+> **Proyecto académico:** Avance N°1 — Diseño UI/UX y Frontend Móvil
+> **Asignatura:** Tecnologías Web y Móviles (6º semestre) — Ingeniería Civil en Informática, Universidad de Los Lagos
 > **Autor:** Vicente Martín Garín Pereda
 
 ---
 
-## Documentación y Entregables del Avance N°1
+## Entregables del Avance N°1
 
-* **Bitácora de Diseño y Frontend:** [docs/bitacora.md](./docs/bitacora.md)
-* **Prototipo Interactivo en Figma:** [Abrir Prototipo en Figma](https://www.figma.com/design/bCv8y8gXMaHy6oLUagS4PI/se%C3%B1aCampus?node-id=3-362&t=3c6s7hihCM2XMi2I-1)
-
----
-
-## Stack Tecnológico
-
-* **Framework Móvil:** React Native + Expo SDK 58
-* **Enrutamiento:** Expo Router (`src/app/` con layouts anidados, pestañas y rutas dinámicas `[id]` y `[sessionId]`)
-* **Gestión de Estado:** React Context API (`SubjectsContext`) + Hooks (`useState`, `useEffect`)
-* **Componentes Nativos y Accesibilidad:** `FlatList`, `Pressable` (áreas táctiles >= 48 dp), `SafeAreaView`, `useSafeAreaInsets`, `TextInput` controlado, tokens de contraste WCAG AA (`src/constants/theme.js`)
+* **Bitácora de diseño y frontend:** [docs/bitacora.md](./docs/bitacora.md)
+* **Diseño y prototipo en Figma:** [señaCampus en Figma](https://www.figma.com/design/bCv8y8gXMaHy6oLUagS4PI/se%C3%B1aCampus?node-id=3-362&t=3c6s7hihCM2XMi2I-1)
 
 ---
 
-## Estructura del Proyecto Móvil (`mobile/`)
+## Stack tecnológico
 
-    mobile/
-    ├── app.json
-    ├── package.json
-    └── src/
-        ├── app/
-        │   ├── _layout.jsx              # Stack principal y proveedor de contexto
-        │   ├── index.jsx                # Acceso institucional
-        │   ├── ajustes.jsx              # Configuración de accesibilidad
-        │   ├── asignatura/[id].jsx      # Clases guardadas por asignatura
-        │   ├── sesion/[sessionId].jsx   # Lectura organizada de clase guardada
-        │   └── (tabs)/
-        │       ├── _layout.jsx          # Navegación inferior por pestañas
-        │       ├── index.jsx            # Listado y creación de asignaturas
-        │       ├── traducir.jsx         # Cátedra en vivo (Voz docente -> LSCh)
-        │       └── dialogo.jsx          # Comunicación rápida estudiante <-> docente
-        ├── components/
-        │   └── ScreenHeader.jsx         # Cabecera reutilizable con botón Volver
-        ├── constants/
-        │   └── theme.js                 # Paleta WCAG AA, tipografía y espaciados
-        ├── context/
-        │   └── SubjectsContext.jsx      # Estado global de asignaturas y sesiones
-        └── data/
-            └── mockData.js              # Datos realistas del dominio universitario
+* **Framework móvil:** React Native + Expo SDK 58 (probado en Expo Go)
+* **Navegación:** Expo Router (`src/app/`) con layout raíz en pila, pestañas inferiores y rutas dinámicas (`asignatura/[id]`, `clase/[id]`)
+* **Estado:** hooks de React (`useState`, `useEffect`, `useRef`) y datos de ejemplo en `src/data/mockData.js`
+* **Componentes nativos:** `FlatList` (listas), `Pressable` (toques con estado presionado), `TextInput` controlado, `Modal`, `Switch`, `SafeAreaView` / `useSafeAreaInsets`
+* **Diseño:** colores, tipografía (Nunito) y medidas centralizados en `src/constants/`, iguales a los estilos del Figma; íconos `lucide-react-native`; logo SVG con `react-native-svg`
+* **Backend (siguiente avance):** servidor Node en `server/` con Docker (`docker-compose.yml`); cliente HTTP preparado en `mobile/src/services/api.js`
 
 ---
 
-## Requisitos y Ejecución Local
+## Estructura del proyecto
 
-### Requisitos Previos
-* **Node.js:** v18 o superior (recomendado v20 LTS)
-* **Expo Go:** Instalado en dispositivo físico Android o iOS (compatible con SDK 58/57)
+    SenaCampus/
+    ├── docs/
+    │   ├── bitacora.md
+    │   └── img/                     # Capturas de Figma y de la app
+    ├── server/                      # API (siguiente avance)
+    ├── docker-compose.yml
+    └── mobile/
+        ├── app.json                 # Nombre, ícono y pantalla de carga
+        ├── assets/                  # logo.svg, icon.png, splash-icon.png, adaptive-icon.png
+        └── src/
+            ├── app/
+            │   ├── _layout.jsx          # Pila raíz + carga de la fuente Nunito
+            │   ├── index.jsx            # Acceso con correo institucional
+            │   ├── ajustes.jsx          # Ajustes de accesibilidad
+            │   ├── resumen.jsx          # Resumen al terminar la clase
+            │   ├── asignatura/[id].jsx  # Detalle de asignatura e historial
+            │   ├── clase/[id].jsx       # Transcripción guardada
+            │   └── (tabs)/
+            │       ├── _layout.jsx      # Barra de pestañas
+            │       ├── index.jsx        # Asignaturas (inicio)
+            │       ├── traducir.jsx     # Traducción en clase
+            │       └── dialogo.jsx      # Modo diálogo
+            ├── components/              # Aviso, BarraSuperior, Boton, Burbuja, Chip, FilaAjuste,
+            │                            # Logo, Tarjeta, VentanaConfirmacion, VisorSenas
+            ├── constants/               # colores.js, medidas.js, tipografia.js
+            ├── data/                    # mockData.js
+            └── services/                # api.js
 
-### Pasos para Ejecutar
+---
+
+## Requisitos y ejecución local
+
+### Requisitos previos
+* **Node.js:** v20 LTS o superior
+* **Expo Go:** instalado en un teléfono Android o iOS, compatible con **SDK 58** (o 57)
+* El teléfono y el computador deben estar en la misma red Wi-Fi
+
+### Pasos para ejecutar
 1. **Clonar el repositorio:**
    `git clone https://github.com/Vicente-Garin/SenaCampus.git && cd SenaCampus/mobile`
 2. **Instalar dependencias:**
    `npm install`
-3. **Iniciar el servidor de desarrollo Expo:**
+3. **Iniciar el servidor de desarrollo:**
    `npx expo start -c`
-4. **Abrir en el teléfono:** Escanea el código QR generado en la terminal utilizando la aplicación **Expo Go**.
+4. **Abrir en el teléfono:** escanear el código QR de la terminal con **Expo Go** (Android) o con la cámara (iOS).
 
+---
 
+## Capturas
+
+| Asignaturas | Traducción en vivo | Confirmar fin de clase | Transcripción guardada |
+| :---: | :---: | :---: | :---: |
+| ![Asignaturas](./docs/img/app-asignaturas.png) | ![Traducir](./docs/img/app-traducir.png) | ![Confirmar](./docs/img/app-modal-guardar.png) | ![Transcripción](./docs/img/app-lectura.png) |
