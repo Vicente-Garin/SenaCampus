@@ -78,6 +78,6 @@ Aplicación móvil desarrollada en **React Native con Expo (SDK 58)** para apoya
 
 ## Capturas
 
-| Asignaturas | Traducción en vivo | Confirmar fin de clase | Transcripción guardada |
+| Acceso | Asignaturas | Traducción en clase | Modo diálogo |
 | :---: | :---: | :---: | :---: |
-| ![Asignaturas](./docs/img/app-asignaturas.png) | ![Traducir](./docs/img/app-traducir.png) | ![Confirmar](./docs/img/app-modal-guardar.png) | ![Transcripción](./docs/img/app-lectura.png) |
+| ![Acceso](./docs/img/app-acceso.png) | ![Asignaturas](./docs/img/app-asignaturas.png) | ![Traducir](./docs/img/app-traducir.png) | ![Diálogo](./docs/img/app-dialogo.png) |

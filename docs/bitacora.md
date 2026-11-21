@@ -109,12 +109,17 @@ Cambios principales entre ambas versiones: el visor de señas pasó de un rectá
 
 Capturas tomadas en el teléfono con la app corriendo en **Expo Go**:
 
-| Asignaturas | Traducción en vivo | Confirmar fin de clase | Transcripción guardada |
-| :---: | :---: | :---: | :---: |
-| ![App Asignaturas](./img/app-asignaturas.png) | ![App Traducir](./img/app-traducir.png) | ![App Confirmar](./img/app-modal-guardar.png) | ![App Transcripción](./img/app-lectura.png) |
+| Acceso | Asignaturas | Detalle de asignatura |
+| :---: | :---: | :---: |
+| ![App Acceso](./img/app-acceso.png) | ![App Asignaturas](./img/app-asignaturas.png) | ![App Detalle](./img/app-detalle.png) |
+
+| Traducción en clase | Modo diálogo | Ajustes |
+| :---: | :---: | :---: |
+| ![App Traducir](./img/app-traducir.png) | ![App Diálogo](./img/app-dialogo.png) | ![App Ajustes](./img/app-ajustes.png) |
 
 Interacciones reales de cada interfaz:
-* **Asignaturas:** lista con `FlatList`; al tocar una tarjeta se navega a `asignatura/[id]` pasando el `id` como parámetro.
+* **Acceso:** `TextInput` controlado con validación del correo `@alumnos.ulagos.cl` (borde y mensaje de error si no corresponde).
+* **Asignaturas:** lista con `FlatList`; al tocar una tarjeta se navega a `asignatura/[id]` pasando el `id` como parámetro; el botón de ajustes abre `ajustes.jsx`.
 * **Traducción en clase:** Pausar/Reanudar detiene o reanuda los subtítulos (`useState` + `setInterval` en `useEffect`); el chip de velocidad rota entre 0.75x, 1x y 1.5x; Terminar abre la ventana de confirmación y luego el resumen.
 * **Modo diálogo:** `TextInput` controlado; al enviar se agrega una burbuja a la lista y el botón queda deshabilitado si el campo está vacío.
 * **Ajustes:** los interruptores cambian su estado y la velocidad rota al tocarla.
@@ -148,13 +153,26 @@ Interacciones reales de cada interfaz:
 | Frontend | **Claude** | Crear componentes que faltaban (`Boton`, `Tarjeta`, `Chip`, `FilaAjuste`, `Logo`), rehacer Acceso y Ajustes según el Figma, comparar app y Figma, limpiar archivos antiguos |
 | Documentación | Gemini y Claude | Redactar README y esta bitácora |
 
-### Prompts principales
-<!-- Agregar capturas de cada prompt en docs/img/ia-1.png, ia-2.png, etc. -->
+### Prompts principales (9)
 
-1. *«Necesito que me ayudes a editar mi Figma a través de esta rúbrica.»* (Claude, con la rúbrica en PDF) → ![Prompt 1](./img/ia-1.png)
-2. *«Agrega un color extra que haga resaltar el color naranja durazno.»* (Claude) → ![Prompt 2](./img/ia-2.png)
-3. *«Analiza la rúbrica del Avance N°1 y reestructura el frontend móvil a Expo Router con `src/app/`, layouts anidados, `FlatList`, `Pressable` y `SafeAreaView`.»* (Gemini) → ![Prompt 3](./img/ia-3.png)
-4. *«Actualicé el Figma de SeñaCampus y necesito que el código quede igual al diseño nuevo…»* (Gemini, con la especificación de colores, tipografía y componentes) → ![Prompt 4](./img/ia-4.png)
+Cada prompt está citado tal como lo escribí. La fecha corresponde al **commit asociado**: Gemini no muestra la fecha de cada mensaje, así que la relación con los commits es aproximada. Las capturas están en `docs/img/ia-1.png` a `ia-9.png`.
+
+| # | Fecha | Herramienta | Prompt | Qué se aceptó, qué se corrigió y por qué |
+| :-: | :--- | :--- | :--- | :--- |
+| 1 | 29 oct | Gemini | *«necesito que hagamos una guia de trabajo una ruta en si de como realizaremos todo esto, primero trabajamos lo que seria las pantallas luego trabajamos a fondo en backend o que debo hacer primero»* | Gemini propuso no maquetar las 16 pantallas primero, sino: esqueleto de Expo → MongoDB con Docker y el diccionario → endpoint `/api/v1/traductor/parse` → pantalla de traducción en vivo → resto de pantallas → guardado de clases. Se aceptó el orden y se ve en los commits del 29 de octubre. Se descartó por ahora Google Cloud Speech-to-Text y `expo-av`: en este avance la voz se simula con datos de ejemplo. |
+| 2 | 29 oct | Gemini | *«antes de pegar ese codigo necesito saber si es directamente de lengua de señas chilenas? porque aqui encontre un diccionario de 3000 palabras de la jerga chilena»* | **Validación crítica que destapó una alucinación:** al preguntarle, Gemini reconoció que el código de carga que me había dado **no era un corpus de LSCh, sino un generador sintético de prueba**. También aclaró que un diccionario de jerga chilena no es lo mismo que la LSCh (lengua reconocida por la Ley 21.303). Se descartó ese código y se usó como fuente el Diccionario Bilingüe LSCh–Español (PDF A–H e I–Z): se cargaron 2098 términos en MongoDB. |
+| 3 | 29 oct | Gemini | *«explicame que hace cada carpeta que movimos en server: env es donde tenemos la config del server, el gloss js es como el almacenamiento de cada seña, el seed dictionary es donde cargamos las palabras… el textparser transforma las palabras… translation controller ve si es una palabra que tendrá que ser deletreada»* | Expliqué la arquitectura con mis palabras para comprobar que entendía el código. Gemini confirmó el flujo y precisó dos cosas que yo no había nombrado: el parser también **elimina conectores** («el», «la», «de», «hay») que no se usan en la gramática de señas, y el controlador revisa primero **frases compuestas** («sala de clases») antes de separar palabra por palabra. Faltaba además nombrar `db.js` (conexión a MongoDB), `translationRoutes.js` (expone `POST /api/v1/traductor/parse`) y `server.js` (Express, CORS y puerto 5000). |
+| 4 | entre 31 oct y 4 nov (sin commit) | Gemini | *«quedemonos stand by en el proyecto, no me des codigo… lo que hara la app que la hace una gran idea es hacer que la app escuche al profesor y traduzca en tiempo real en lengua de señas y texto en vivo para la persona sorda»* | Detuve la generación de código para redefinir el problema. Gemini planteó que la app no debe transcribir palabra por palabra (la LSCh tiene otra estructura y el profesor habla rápido) y propuso una **doble modalidad**: subtítulos en vivo + un visor central con la glosa en mayúsculas y **deletreo de rescate** para tecnicismos. Se aceptó: es la base de la pantalla Traducir y de la pantalla 15 (palabra sin seña). Para el visor se optó por una ilustración vectorial simple en este avance; la decisión entre grabar GIF de una persona real o usar un avatar queda abierta. La cifra de «120 a 150 palabras por minuto» no se verificó con una fuente, por eso no se usa como dato en el informe. |
+| 5 | 4 nov | Gemini | *«okey, lo que haremos ahora es formar cada pestaña desde inicio sesion hasta la pestaña de ajustes, necesitas que te envie el flujo completo de mi figma??»* | Gemini pidió el flujo de Figma para replicar colores, tipografía y componentes, y propuso `Stack` para el acceso y los modales y `BottomTabs` para las pantallas principales. Se aceptó la jerarquía (pila + pestañas), pero el 18 de noviembre se migró de React Navigation a **Expo Router**, que es lo que pide la rúbrica. Se corrigió también: la app no cargaba en el celular (red y túnel de Expo) y faltaba un botón de volver en las pantallas internas. |
+| 6 | 18 nov | Gemini | *«recuerda que esto es algo para el estudiante, el flujo era habla el profe se traduce al alumno en tiempo real, creo lo hiciste al reves»* | **Corrección directa:** la IA había invertido el flujo. En `traducir.jsx` la entrada manual de texto era la protagonista, como si el estudiante escribiera en vez de recibir la clase. Gemini lo reconoció y se rehízo la pantalla: simula la voz del profesor, muestra los subtítulos en vivo y actualiza el visor de señas. El ingreso de texto quedó solo en la pestaña Diálogo, como canal secundario. |
+| 7 | 18 nov | Gemini | *«cuando entras a una clase guardada te queda todo el texto organizado, no que puedas volver a grabar ahí mismo… que cuando entre a una clase nueva al darle a volver ponga la de ¿quieres guardar esta clase?»* | Decisión de UX propia, aceptada tal cual: una clase guardada se abre en **solo lectura** (`clase/[id].jsx`, sin controles para volver a grabar) y terminar una clase nueva pide confirmación con un modal (heurística de Nielsen: prevención de errores). Gemini implementó además un `SubjectsContext` para guardar las clases en el estado global; en la versión final se retiró para simplificar y cumplir con datos de ejemplo, por lo que el guardado real de clases queda para el siguiente avance junto con el backend. |
+| 8 | 19 nov | Claude | *«hola necesito que me ayudes a editar un articulo figma a traves de esa rubrica entiendes? asi que necesito saber si tendras acceso a figma desde aqui sabiendo que tengo el link pero no pertenece a mi sino que a mi otra cuenta de figma»* (con la rúbrica en PDF) | Claude detectó que su conexión con Figma estaba en otra cuenta y no tenía permiso sobre el archivo; se compartió el archivo con esa cuenta como editora. Luego revisó el Figma contra la rúbrica y creó el UI Kit con estados, los 16 mockups y el prototipo. Al revisar las capturas se corrigieron íconos oscuros en botones naranjos, un chip cortado y contrastes bajo 4,5:1. El plan gratuito de Figma limitó las ediciones automáticas, así que parte del trabajo (logo, prototipo, limpieza de capas) se hizo desde el navegador. |
+| 9 | 20 nov | Gemini | *«Actualicé el Figma de SeñaCampus y necesito que el código quede igual al diseño nuevo. No rehagas la app: mantén la estructura, las rutas y la lógica que ya tenemos, y cambia solo lo necesario…»* (con la especificación completa adjunta) | Prompt adaptado por mí a partir de una especificación de colores, tipografía y componentes preparada con Claude. Gemini respondió que **no puede abrir enlaces de Figma** y que el archivo no se había adjuntado, así que se le envió la especificación completa con el SVG del logo. Al probar el código generado, la app no compilaba: faltaba instalar la fuente Nunito y no existían los componentes `Boton`, `Tarjeta` y `Chip` que importaban las pantallas (*Unable to resolve*). Se corrigió instalando las dependencias con `npx expo install` y creando esos componentes. |
+
+| Capturas de los prompts | | | | |
+| :-: | :-: | :-: | :-: | :-: |
+| ![1](./img/ia-1.png) | ![2](./img/ia-2.png) | ![3](./img/ia-3.png) | ![4](./img/ia-4.png) | ![5](./img/ia-5.png) |
+| ![6](./img/ia-6.png) | ![7](./img/ia-7.png) | ![8](./img/ia-8.png) | ![9](./img/ia-9.png) | |
 
 ### Qué se aceptó, qué se corrigió y por qué
 
