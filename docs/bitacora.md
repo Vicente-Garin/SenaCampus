@@ -58,9 +58,9 @@ Botón (primario, secundario y texto × normal, presionado, deshabilitado, carga
 ## 2. Arquitectura y Flujo de Usuario
 
 ### Storyboard del caso de uso principal (5 viñetas)
-Camila (personaje de ejemplo que representa a una estudiante sorda) sigue una clase en vivo desde su celular:
+Vicente (personaje de ejemplo que representa a un estudiante sordo) sigue una clase en vivo desde su celular:
 
-1. **Se pierde la clase** — *en el aula, sentada al fondo.* El profesor habla rápido y mira a la pizarra; no alcanza a leer sus labios ni a copiar a la vez.
+1. **Se pierde la clase** — *en el aula, sentado al fondo.* El profesor habla rápido y mira a la pizarra; no alcanza a leer sus labios ni a copiar a la vez.
 2. **Abre la app con una mano** — *de pie, con la mochila en la otra mano.* Entra con su correo institucional y toca su asignatura; las acciones quedan abajo, al alcance del pulgar.
 3. **Traduce en vivo** — *celular apoyado en el pupitre.* La app escucha al profesor y muestra las señas y los subtítulos con las palabras clave resaltadas.
 4. **Se cae la señal** — *Wi-Fi del campus inestable.* La app avisa «Sin conexión», ofrece Reintentar y no pierde lo ya traducido.

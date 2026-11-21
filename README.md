@@ -22,7 +22,7 @@ Aplicación móvil desarrollada en **React Native con Expo (SDK 58)** para apoya
 * **Estado:** hooks de React (`useState`, `useEffect`, `useRef`) y datos de ejemplo en `src/data/mockData.js`
 * **Componentes nativos:** `FlatList` (listas), `Pressable` (toques con estado presionado), `TextInput` controlado, `Modal`, `Switch`, `SafeAreaView` / `useSafeAreaInsets`
 * **Diseño:** colores, tipografía (Nunito) y medidas centralizados en `src/constants/`, iguales a los estilos del Figma; íconos `lucide-react-native`; logo SVG con `react-native-svg`
-* **Backend (siguiente avance):** servidor Node en `server/` con Docker (`docker-compose.yml`); cliente HTTP preparado en `mobile/src/services/api.js`
+* **Backend:** Node.js + Express + Mongoose, MongoDB en Docker; cliente HTTP preparado en `mobile/src/services/api.js`
 
 ---
 
@@ -32,8 +32,18 @@ Aplicación móvil desarrollada en **React Native con Expo (SDK 58)** para apoya
     ├── docs/
     │   ├── bitacora.md
     │   └── img/                     # Capturas de Figma y de la app
-    ├── server/                      # API (siguiente avance)
-    ├── docker-compose.yml
+    ├── docker-compose.yml           # MongoDB persistente en Docker
+    ├── server/                      # Backend: Node.js + Express + Mongoose
+    │   ├── .env                     # Puerto y conexión a MongoDB (no se sube a GitHub)
+    │   ├── scripts/
+    │   │   └── seedDictionary.js    # Carga los 2.098 términos del Diccionario LSCh
+    │   └── src/
+    │       ├── server.js            # Punto de entrada: Express, CORS, puerto 5000
+    │       ├── config/db.js         # Conexión a MongoDB
+    │       ├── models/              # Gloss.js, Session.js, Subject.js
+    │       ├── controllers/         # translationController.js, subjectController.js
+    │       ├── routes/              # translationRoutes.js, subjectRoutes.js
+    │       └── utils/textParser.js  # Normaliza texto y quita conectores
     └── mobile/
         ├── app.json                 # Nombre, ícono y pantalla de carga
         ├── assets/                  # logo.svg, icon.png, splash-icon.png, adaptive-icon.png
@@ -58,6 +68,15 @@ Aplicación móvil desarrollada en **React Native con Expo (SDK 58)** para apoya
 
 ---
 
+## Backend y base de datos
+
+El backend ya está implementado y queda listo para conectarse a la app en el siguiente avance (en el Avance N°1 la app usa datos de ejemplo, como permite la rúbrica).
+
+* **Base de datos:** MongoDB en Docker (`docker-compose.yml`) con volumen persistente.
+* **Corpus LSCh:** 2.098 términos cargados desde el *Diccionario Bilingüe Lengua de Señas Chilena – Español* (UMCE), distinguiendo señas con recurso visual y términos que se deletrean (dactilología).
+* **Motor de traducción:** `textParser.js` normaliza el texto y quita conectores que no se señan en LSCh («el», «la», «de», «hay»); `translationController.js` revisa primero frases compuestas («sala de clases») y luego palabras sueltas.
+* **API REST:** `POST /api/v1/traductor/parse` devuelve la secuencia de glosas o letras; también hay rutas CRUD de asignaturas.
+
 ## Requisitos y ejecución local
 
 ### Requisitos previos
@@ -73,6 +92,15 @@ Aplicación móvil desarrollada en **React Native con Expo (SDK 58)** para apoya
 3. **Iniciar el servidor de desarrollo:**
    `npx expo start -c`
 4. **Abrir en el teléfono:** escanear el código QR de la terminal con **Expo Go** (Android) o con la cámara (iOS).
+
+### Backend (opcional en este avance)
+Requiere **Docker Desktop**. Desde la raíz del repositorio:
+
+    docker-compose up -d
+    cd server
+    npm install
+    node scripts/seedDictionary.js   # solo la primera vez
+    npm run dev                      # API en http://localhost:5000
 
 ---
 
