@@ -106,6 +106,10 @@ Requiere **Docker Desktop**. Desde la raíz del repositorio:
 
 ## Capturas
 
-| Acceso | Asignaturas | Traducción en clase | Modo diálogo |
-| :---: | :---: | :---: | :---: |
-| ![Acceso](./docs/img/app-acceso.png) | ![Asignaturas](./docs/img/app-asignaturas.png) | ![Traducir](./docs/img/app-traducir.png) | ![Diálogo](./docs/img/app-dialogo.png) |
+| Acceso | Asignaturas | Detalle de asignatura |
+| :---: | :---: | :---: |
+| ![Acceso](./docs/img/app-acceso.png) | ![Asignaturas](./docs/img/app-asignaturas.png) | ![Detalle](./docs/img/app-detalle.png) |
+
+| Traducción en clase | Modo diálogo | Ajustes |
+| :---: | :---: | :---: |
+| ![Traducir](./docs/img/app-traducir.png) | ![Diálogo](./docs/img/app-dialogo.png) | ![Ajustes](./docs/img/app-ajustes.png) |
