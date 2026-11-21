@@ -147,7 +147,7 @@ Interacciones reales de cada interfaz:
 
 | Etapa | Herramienta | Para qué |
 | :--- | :--- | :--- |
-| Logo | *(completar: herramienta de imágenes usada)* | Generar la imagen base del logo |
+| Logo | **Canva** (generador de imágenes con IA) | Generar la imagen base del logo, que luego se vectorizó con Claude para usarla en Figma y en la app |
 | Diseño en Figma | **Claude** (con acceso al archivo de Figma) | Revisar el archivo contra la rúbrica; completar la paleta (acento azul, semánticos) y verificar contrastes; crear el UI Kit con variantes y estados, los 16 mockups y el prototipo navegable; vectorizar el logo |
 | Frontend | **Gemini** | Migrar la navegación a Expo Router, estructurar pantallas y datos de ejemplo |
 | Frontend | **Claude** | Crear componentes que faltaban (`Boton`, `Tarjeta`, `Chip`, `FilaAjuste`, `Logo`), rehacer Acceso y Ajustes según el Figma, comparar app y Figma, limpiar archivos antiguos |
@@ -178,7 +178,7 @@ Cada prompt está citado tal como lo escribí. La fecha corresponde al **commit 
 
 * **Contrastes que no cumplían WCAG:** el borde de campos `#E2CDBA` daba 1,41:1 y se cambió a `#8C7565` (3,99:1). El verde de éxito daba 4,48:1 sobre su fondo y se oscureció a `#176B42` (5,48:1). Con el fondo del logo en Coral `#D14426`, las ondas amarillas quedaban en 2,99:1, así que se usó Coral texto `#B83A1E` (3,73:1).
 * **Errores visuales del diseño generado:** los íconos dentro de los botones naranjos quedaron oscuros en vez de blancos; un chip («ARQUITECTURA») se cortaba; los chips de letras completadas mostraban «ⓘ» en vez de ✓. Se revisaron las capturas y se corrigieron.
-* **Validación del logo en LSCh:** la IA advirtió que la forma de las manos se parece a la seña *INTERPRETAR* de la lengua de señas estadounidense (ASL) y que no podía confirmar su significado en LSCh. Por eso el logo se presenta como representación de la conversación en señas, no como una seña específica. *(Completar si se validó con una persona sorda o intérprete.)*
+* **Validación del logo en LSCh:** la IA advirtió que la forma de las manos se parece a la seña *INTERPRETAR* de la lengua de señas estadounidense (ASL) y que no podía confirmar su significado en LSCh. Por eso el logo se presenta como representación de la conversación en señas, no como una seña específica. La validación de la seña con una persona sorda o intérprete de LSCh **está en curso**: se consultó y se espera respuesta. Si la seña no corresponde a la LSCh, se ajustará el logo en el siguiente avance.
 * **Código que no corría:** faltaba instalar `@expo-google-fonts/nunito` y no existían los componentes `Boton`, `Tarjeta` y `Chip` que importaban las pantallas (error *Unable to resolve*). Se instalaron con `npx expo install` y se crearon los componentes con las mismas props que usaban las pantallas.
 * **Detalles de lógica:** el botón de ajustes no tenía `onPress`; el saludo tenía el nombre escrito a mano (se movió a `USUARIO` en `mockData.js`); «Volver al inicio» llevaba al login en vez de a Asignaturas.
 * **Dependencias de red:** una primera versión cargaba datos desde la API local (IP fija), lo que fallaría en Expo Go durante la defensa. Se dejaron datos de ejemplo en `src/data/mockData.js`, como permite la rúbrica; la conexión con el backend (`src/services/api.js`) queda para el siguiente avance.
