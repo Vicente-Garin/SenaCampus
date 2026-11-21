@@ -1,5 +1,5 @@
-﻿import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Mic, RotateCcw, Gauge, Pause, Play, Square } from 'lucide-react-native';
@@ -54,6 +54,12 @@ export default function TraducirScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
       <View style={styles.contenedor}>
+        {/* Parte central desplazable: en pantallas chicas nada queda oculto ni se corta */}
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.contenidoScroll}
+          showsVerticalScrollIndicator={false}
+        >
         <Text style={styles.titulo}>Tecnologías Web y Móviles</Text>
 
         <View style={styles.filaEstado}>
@@ -64,7 +70,7 @@ export default function TraducirScreen() {
           />
         </View>
 
-        <VisorSenas estado="senando" senaActual={SENAS_PROXIMAS[indiceSena]} alto={210} />
+        <VisorSenas estado="senando" senaActual={SENAS_PROXIMAS[indiceSena]} alto={200} />
 
         <View style={styles.filaControles}>
           <Chip
@@ -84,7 +90,12 @@ export default function TraducirScreen() {
         </View>
 
         <Text style={styles.rotulo}>PRÓXIMAS SEÑAS</Text>
-        <View style={styles.filaSenas}>
+        {/* Fila horizontal desplazable: las señas no se parten en dos líneas */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.filaSenas}
+        >
           {SENAS_PROXIMAS.map((sena, idx) => {
             const estadoChip =
               idx < indiceSena ? 'completado' : idx === indiceSena ? 'activo' : 'normal';
@@ -98,11 +109,12 @@ export default function TraducirScreen() {
               />
             );
           })}
-        </View>
+        </ScrollView>
 
         <View style={styles.cajaSubtitulo}>
           <Text style={styles.textoSubtitulo}>{renderizarSubtitulo(textoActual)}</Text>
         </View>
+        </ScrollView>
 
         <View style={styles.filaInferior}>
           <Boton
@@ -157,15 +169,17 @@ const styles = StyleSheet.create({
   filaEstado: { alignItems: 'flex-start' },
   filaControles: { flexDirection: 'row', gap: 10 },
   rotulo: { ...TIPOGRAFIA.etiqueta, color: COLORES.tintaSuave },
-  filaSenas: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  scroll: { flex: 1 },
+  contenidoScroll: { gap: 12, paddingBottom: 4 },
+  filaSenas: { flexDirection: 'row', gap: 8 },
   cajaSubtitulo: {
-    flex: 1,
+    minHeight: 76, // alto mínimo: el subtítulo siempre se ve
+    justifyContent: 'center',
     backgroundColor: COLORES.blanco,
     borderRadius: MEDIDAS.radios.tarjeta,
     borderWidth: 1,
     borderColor: COLORES.borde,
     padding: 16,
-    justifyContent: 'center',
   },
   textoSubtitulo: { ...TIPOGRAFIA.cuerpo, color: COLORES.tinta },
   claveSubtitulo: { ...TIPOGRAFIA.cuerpoDestacado, color: COLORES.azul },
