@@ -1,76 +1,92 @@
-﻿import React, { useState } from 'react';
-import { View, Text, TextInput, Pressable, FlatList, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+﻿import React, { useState, useRef } from 'react';
+import {
+  View,
+  Text,
+  FlatList,
+  TextInput,
+  Pressable,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { COLORS, TYPOGRAPHY, SIZES, SHADOWS } from '../../constants/theme';
-import { QUICK_PHRASES } from '../../data/mockData';
-import ScreenHeader from '../../components/ScreenHeader';
+import { Send } from 'lucide-react-native';
+import { COLORES } from '../../constants/colores';
+import { TIPOGRAFIA } from '../../constants/tipografia';
+import { MEDIDAS } from '../../constants/medidas';
+import { MENSAJES_DIALOGO_INICIALES } from '../../data/mockData';
+import { VisorSenas } from '../../components/VisorSenas';
+import { Burbuja } from '../../components/Burbuja';
 
 export default function DialogoScreen() {
-  const [messages, setMessages] = useState([
-    { id: '1', sender: 'system', text: 'Toca una frase rápida o escribe tu pregunta para mostrarla al docente.' },
-  ]);
-  const [draft, setDraft] = useState('');
+  const [mensajes, setMensajes] = useState(MENSAJES_DIALOGO_INICIALES);
+  const [texto, setTexto] = useState('');
+  const [enfocado, setEnfocado] = useState(false);
+  const listaRef = useRef(null);
 
-  const sendMessage = (textToSend) => {
-    const clean = textToSend.trim();
-    if (!clean) return;
-    setMessages((prev) => [
-      { id: String(Date.now()), sender: 'student', text: clean },
-      ...prev,
-    ]);
-    setDraft('');
+  const textoLimpio = texto.trim();
+  const puedeEnviar = textoLimpio.length > 0;
+
+  const enviarMensaje = () => {
+    if (!puedeEnviar) return;
+    const nuevo = {
+      id: `m-${Date.now()}`,
+      lado: 'yo',
+      autor: 'Tú',
+      mensaje: textoLimpio,
+    };
+    setMensajes((prev) => [...prev, nuevo]);
+    setTexto('');
+    setTimeout(() => listaRef.current?.scrollToEnd({ animated: true }), 100);
   };
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
       <KeyboardAvoidingView
-        style={styles.container}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={styles.flexUno}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <ScreenHeader
-          title="Diálogo en Aula"
-          subtitle="Respuesta rápida del estudiante"
-        />
+        <View style={styles.contenedor}>
+          <Text style={styles.titulo}>Conversar</Text>
+          <Text style={styles.subtitulo}>Para hablar con alguien fuera de clase.</Text>
 
-        <View style={{ height: 52, marginBottom: 10 }}>
+          <VisorSenas estado="senando" senaActual="SALA" alto={170} />
+
           <FlatList
-            horizontal
-            data={QUICK_PHRASES}
-            keyExtractor={(item) => item}
-            showsHorizontalScrollIndicator={false}
+            ref={listaRef}
+            data={mensajes}
+            keyExtractor={(item) => item.id}
+            style={styles.lista}
+            contentContainerStyle={styles.listaContenido}
+            showsVerticalScrollIndicator={false}
             renderItem={({ item }) => (
-              <Pressable style={styles.quickPill} onPress={() => sendMessage(item)}>
-                <Text style={styles.quickPillText}>{item}</Text>
-              </Pressable>
+              <Burbuja autor={item.autor} mensaje={item.mensaje} lado={item.lado} />
             )}
           />
-        </View>
 
-        <FlatList
-          data={messages}
-          inverted
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <View style={[styles.bubble, item.sender === 'student' ? styles.studentBubble : styles.systemBubble]}>
-              <Text style={[styles.bubbleText, item.sender === 'student' && styles.studentText]}>
-                {item.text}
-              </Text>
-            </View>
-          )}
-          contentContainerStyle={{ paddingVertical: 8 }}
-        />
-
-        <View style={styles.composer}>
-          <TextInput
-            style={styles.input}
-            value={draft}
-            onChangeText={setDraft}
-            placeholder="Escribe tu consulta al profesor..."
-            placeholderTextColor={COLORS.textMuted}
-          />
-          <Pressable style={styles.sendBtn} onPress={() => sendMessage(draft)}>
-            <Text style={styles.sendBtnText}>Enviar</Text>
-          </Pressable>
+          <View style={styles.filaEntrada}>
+            <TextInput
+              value={texto}
+              onChangeText={setTexto}
+              onFocus={() => setEnfocado(true)}
+              onBlur={() => setEnfocado(false)}
+              placeholder="Escribe tu respuesta…"
+              placeholderTextColor={COLORES.tintaSuave}
+              style={[styles.campo, enfocado && styles.campoEnfocado]}
+              returnKeyType="send"
+              onSubmitEditing={enviarMensaje}
+            />
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Enviar mensaje"
+              accessibilityState={{ disabled: !puedeEnviar }}
+              disabled={!puedeEnviar}
+              onPress={enviarMensaje}
+              style={[styles.botonEnviar, !puedeEnviar && styles.botonDeshabilitado]}
+            >
+              <Send size={22} strokeWidth={2} color={COLORES.blanco} />
+            </Pressable>
+          </View>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -78,40 +94,48 @@ export default function DialogoScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: COLORS.background },
-  container: { flex: 1, paddingHorizontal: SIZES.padding, paddingTop: 8, paddingBottom: 12 },
-  quickPill: {
-    minHeight: SIZES.touchMin,
-    backgroundColor: COLORS.primaryLight,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    justifyContent: 'center',
-    marginRight: 10,
-  },
-  quickPillText: { fontSize: TYPOGRAPHY.caption, fontWeight: '700', color: COLORS.primary },
-  bubble: { padding: 16, borderRadius: 16, marginBottom: 10, maxWidth: '88%' },
-  systemBubble: { backgroundColor: COLORS.surface, alignSelf: 'flex-start', borderWidth: 1, borderColor: COLORS.border },
-  studentBubble: { backgroundColor: COLORS.primary, alignSelf: 'flex-end', ...SHADOWS.light },
-  bubbleText: { fontSize: TYPOGRAPHY.body, color: COLORS.textDark, lineHeight: 22 },
-  studentText: { color: COLORS.surface, fontWeight: '600' },
-  composer: { flexDirection: 'row', gap: 10, paddingTop: 6 },
-  input: {
+  safeArea: { flex: 1, backgroundColor: COLORES.crema },
+  flexUno: { flex: 1 },
+  contenedor: {
     flex: 1,
-    minHeight: SIZES.touchMin,
-    backgroundColor: COLORS.surface,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    fontSize: TYPOGRAPHY.body,
-    color: COLORS.textDark,
+    paddingHorizontal: MEDIDAS.margenPantalla,
+    paddingTop: 10,
+    paddingBottom: 12,
+    gap: 10,
   },
-  sendBtn: {
-    minHeight: SIZES.touchMin,
-    paddingHorizontal: 20,
-    backgroundColor: COLORS.primary,
-    borderRadius: 12,
+  titulo: { ...TIPOGRAFIA.tituloPantalla, color: COLORES.tinta },
+  subtitulo: { ...TIPOGRAFIA.cuerpo, color: COLORES.tintaSuave },
+  lista: { flex: 1 },
+  listaContenido: { paddingVertical: 8 },
+  filaEntrada: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  campo: {
+    flex: 1,
+    height: 54,
+    backgroundColor: COLORES.blanco,
+    borderWidth: 2,
+    borderColor: COLORES.bordeCampo,
+    borderRadius: 27,
+    paddingHorizontal: 18,
+    ...TIPOGRAFIA.cuerpo,
+    color: COLORES.tinta,
+  },
+  campoEnfocado: {
+    borderWidth: 3,
+    borderColor: COLORES.azul,
+  },
+  botonEnviar: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    backgroundColor: COLORES.azul,
     justifyContent: 'center',
+    alignItems: 'center',
   },
-  sendBtnText: { color: COLORS.surface, fontSize: TYPOGRAPHY.body, fontWeight: 'bold' },
+  botonDeshabilitado: {
+    opacity: 0.4,
+  },
 });

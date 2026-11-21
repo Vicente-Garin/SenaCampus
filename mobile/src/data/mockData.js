@@ -1,4 +1,11 @@
-﻿// Datos realistas de ejemplo en español de Chile para SeñaCampus (usuaria: Camila Rojas)
+// Datos realistas de ejemplo en español de Chile para SeñaCampus
+
+// Usuario con sesión iniciada (se muestra en el saludo de Asignaturas y en el Acceso)
+export const USUARIO = {
+  nombre: 'Vicente',
+  apellido: 'Garín',
+  correo: 'vicente.garin@alumnos.ulagos.cl',
+};
 
 export const ASIGNATURAS = [
   {

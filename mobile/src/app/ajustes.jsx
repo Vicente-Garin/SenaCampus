@@ -1,69 +1,100 @@
-﻿import React, { useState } from 'react';
-import { View, Text, Pressable, Switch, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { COLORS, TYPOGRAPHY, SIZES, SHADOWS } from '../constants/theme';
-import ScreenHeader from '../components/ScreenHeader';
+import { ALargeSmall, Captions, Vibrate, Gauge, Globe, LogOut } from 'lucide-react-native';
+import { COLORES } from '../constants/colores';
+import { TIPOGRAFIA } from '../constants/tipografia';
+import { MEDIDAS } from '../constants/medidas';
+import { BarraSuperior } from '../components/BarraSuperior';
+import { FilaAjuste } from '../components/FilaAjuste';
+import { Tarjeta } from '../components/Tarjeta';
+import { Aviso } from '../components/Aviso';
+import { Boton } from '../components/Boton';
 
+const VELOCIDADES = ['0.75x (lenta)', '1x (normal)', '1.5x (rápida)'];
+
+// Pantalla 11 · Ajustes (Figma). Se abre desde el botón de ajustes de Asignaturas.
 export default function AjustesScreen() {
   const router = useRouter();
-  const [largeText, setLargeText] = useState(false);
-  const [subtitles, setSubtitles] = useState(true);
+
+  // Estado local de cada ajuste: al cambiar, React vuelve a dibujar la pantalla
+  const [textoGrande, setTextoGrande] = useState(false);
+  const [subtitulos, setSubtitulos] = useState(true);
+  const [vibrar, setVibrar] = useState(true);
+  const [indiceVelocidad, setIndiceVelocidad] = useState(1);
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        <ScreenHeader title="Ajustes" subtitle="Accesibilidad en aula" />
+    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom', 'left', 'right']}>
+      <View style={styles.contenedor}>
+        <BarraSuperior textoVolver="Inicio" />
 
-        <View style={styles.cardRow}>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.itemTitle}>Subtítulos automáticos</Text>
-            <Text style={styles.itemSub}>Mostrar transcripción junto a la seña</Text>
-          </View>
-          <Switch value={subtitles} onValueChange={setSubtitles} trackColor={{ true: COLORS.primary }} />
+        <ScrollView contentContainerStyle={styles.lista} showsVerticalScrollIndicator={false}>
+          <Text style={styles.titulo}>Ajustes</Text>
+
+          <FilaAjuste
+            titulo="Texto grande"
+            detalle="Subtítulos más fáciles de leer"
+            Icono={ALargeSmall}
+            valor={textoGrande}
+            onCambiar={setTextoGrande}
+          />
+          <FilaAjuste
+            titulo="Mostrar subtítulos"
+            detalle="Texto bajo las señas"
+            Icono={Captions}
+            valor={subtitulos}
+            onCambiar={setSubtitulos}
+          />
+          <FilaAjuste
+            titulo="Vibrar al detectar voz"
+            detalle="Aviso cuando alguien habla"
+            Icono={Vibrate}
+            valor={vibrar}
+            onCambiar={setVibrar}
+          />
+
+          {/* Al tocar, rota entre las tres velocidades */}
+          <Tarjeta
+            titulo="Velocidad de las señas"
+            detalle={VELOCIDADES[indiceVelocidad]}
+            Icono={Gauge}
+            onPress={() => setIndiceVelocidad((prev) => (prev + 1) % VELOCIDADES.length)}
+          />
+          <Tarjeta
+            titulo="Idioma de la voz"
+            detalle="Español de Chile (es-CL)"
+            Icono={Globe}
+            mostrarChevron={false}
+          />
+
+          <Aviso
+            tipo="info"
+            mensaje="SeñaCampus es un apoyo. No reemplaza a un intérprete de LSCh."
+          />
+        </ScrollView>
+
+        <View style={styles.accionInferior}>
+          <Boton
+            etiqueta="Cerrar sesión"
+            tipo="secundario"
+            Icono={LogOut}
+            onPress={() => router.replace('/')}
+          />
         </View>
-
-        <View style={styles.cardRow}>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.itemTitle}>Texto ampliado</Text>
-            <Text style={styles.itemSub}>Aumentar tamaño de lectura en cátedra</Text>
-          </View>
-          <Switch value={largeText} onValueChange={setLargeText} trackColor={{ true: COLORS.primary }} />
-        </View>
-
-        <Pressable style={styles.logoutBtn} onPress={() => router.replace('/')}>
-          <Text style={styles.logoutText}>Cerrar sesión</Text>
-        </Pressable>
       </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: COLORS.background },
-  container: { flex: 1, padding: SIZES.padding },
-  cardRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.surface,
-    padding: 18,
-    borderRadius: SIZES.radius,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    marginBottom: 12,
-    ...SHADOWS.light,
+  safeArea: { flex: 1, backgroundColor: COLORES.crema },
+  contenedor: {
+    flex: 1,
+    paddingHorizontal: MEDIDAS.margenPantalla,
+    paddingBottom: 14,
   },
-  itemTitle: { fontSize: TYPOGRAPHY.body, fontWeight: 'bold', color: COLORS.textDark },
-  itemSub: { fontSize: TYPOGRAPHY.caption, color: COLORS.textSecondary, marginTop: 2 },
-  logoutBtn: {
-    minHeight: SIZES.touchMin,
-    backgroundColor: COLORS.surface,
-    borderWidth: 1.5,
-    borderColor: COLORS.primary,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  logoutText: { color: COLORS.primary, fontSize: TYPOGRAPHY.body, fontWeight: 'bold' },
+  lista: { gap: 12, paddingBottom: 16 },
+  titulo: { ...TIPOGRAFIA.tituloPantalla, color: COLORES.tinta, marginBottom: 4 },
+  accionInferior: { paddingTop: 8 },
 });

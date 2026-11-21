@@ -6,21 +6,34 @@
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "splash": {
+      "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#FAF9F6"
+      "backgroundColor": "#FFF4E6"
     },
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#FAF9F6"
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#B83A1E"
       }
     },
     "plugins": [
       "expo-status-bar",
-      "expo-router"
+      "expo-router",
+      "expo-font",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 160,
+          "resizeMode": "contain",
+          "backgroundColor": "#FFF4E6"
+        }
+      ]
     ],
-    "scheme": "senacampus"
+    "scheme": "senacampus",
+    "icon": "./assets/icon.png"
   }
 }

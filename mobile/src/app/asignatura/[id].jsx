@@ -1,122 +1,119 @@
 ﻿import React from 'react';
-import { View, Text, Pressable, FlatList, StyleSheet } from 'react-native';
+import { View, Text, FlatList, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { COLORS, TYPOGRAPHY, SIZES, SHADOWS } from '../../constants/theme';
-import { useSubjects } from '../../context/SubjectsContext';
-import ScreenHeader from '../../components/ScreenHeader';
+import { Clock, Hand, Inbox } from 'lucide-react-native';
+import { COLORES } from '../../constants/colores';
+import { TIPOGRAFIA } from '../../constants/tipografia';
+import { MEDIDAS } from '../../constants/medidas';
+import { ASIGNATURAS, CLASES_POR_ASIGNATURA } from '../../data/mockData';
+import { BarraSuperior } from '../../components/BarraSuperior';
+import { Tarjeta } from '../../components/Tarjeta';
+import { Boton } from '../../components/Boton';
 
 export default function DetalleAsignaturaScreen() {
-  const router = useRouter();
   const { id } = useLocalSearchParams();
-  const { subjects } = useSubjects();
+  const router = useRouter();
 
-  const subject = subjects.find((s) => s.id === id) || subjects[0];
-  const sessions = subject?.sessions || [];
+  const asignatura = ASIGNATURAS.find((a) => a.id === id) || ASIGNATURAS[0];
+  const clases = CLASES_POR_ASIGNATURA[asignatura.id] || [];
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        <ScreenHeader title={subject.title} subtitle={subject.room} />
+    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom', 'left', 'right']}>
+      <View style={styles.contenedor}>
+        <BarraSuperior textoVolver="Asignaturas" />
 
-        <View style={styles.rowBetween}>
-          <Text style={styles.sectionTitle}>Clases Guardadas ({sessions.length})</Text>
-          <Pressable
-            style={({ pressed }) => [styles.newLiveBtn, pressed && styles.pressed]}
-            onPress={() =>
-              router.push({
-                pathname: '/(tabs)/traducir',
-                params: { subjectId: subject.id },
-              })
-            }
-          >
-            <Text style={styles.newLiveText}>+ Nueva clase</Text>
-          </Pressable>
-        </View>
+        <Text style={styles.titulo}>{asignatura.nombre}</Text>
+        <Text style={styles.meta}>
+          Sala {asignatura.sala} · {asignatura.profesor}
+        </Text>
+        <Text style={styles.meta}>{asignatura.horario}</Text>
 
-        {sessions.length === 0 ? (
-          <View style={styles.emptyBox}>
-            <Text style={styles.emptyTitle}>Aún no hay clases guardadas</Text>
-            <Text style={styles.emptySub}>
-              Presiona "+ Nueva clase" para grabar la cátedra y guardarla aquí.
+        <Text style={styles.rotulo}>HISTORIAL DE CLASES</Text>
+
+        {clases.length === 0 ? (
+          <View style={styles.vacio}>
+            <View style={styles.circuloVacio}>
+              <Inbox size={36} strokeWidth={2} color={COLORES.azul} />
+            </View>
+            <Text style={styles.tituloVacio}>Aún no hay clases guardadas</Text>
+            <Text style={styles.textoVacio}>
+              Cuando traduzcas una clase, aparecerá aquí para que la repases.
             </Text>
+            <Boton
+              etiqueta="Ir a traducir ahora"
+              tipo="secundario"
+              onPress={() => router.push('/(tabs)/traducir')}
+            />
           </View>
         ) : (
           <FlatList
-            data={sessions}
+            data={clases}
             keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.lista}
             showsVerticalScrollIndicator={false}
             renderItem={({ item }) => (
-              <Pressable
-                style={({ pressed }) => [styles.sessionCard, pressed && styles.pressed]}
-                onPress={() =>
-                  router.push({
-                    pathname: '/sesion/[sessionId]',
-                    params: { subjectId: subject.id, sessionId: item.id },
-                  })
-                }
-              >
-                <View style={styles.sessionTop}>
-                  <Text style={styles.dateBadge}>{item.date}</Text>
-                  <Text style={styles.readOnlyTag}>Solo lectura ›</Text>
-                </View>
-                <Text style={styles.topicTitle}>{item.topic}</Text>
-                <Text style={styles.segmentCount}>
-                  {item.segments.length} bloques transcritos y traducidos
-                </Text>
-              </Pressable>
+              <Tarjeta
+                titulo={item.fecha}
+                detalle={`${item.duracion} · ${item.palabras.toLocaleString('es-CL')} palabras`}
+                Icono={Clock}
+                onPress={() => router.push(`/clase/${item.id}`)}
+              />
             )}
           />
         )}
+
+        <View style={styles.accionInferior}>
+          <Boton
+            etiqueta="Traducir esta clase"
+            tipo="primario"
+            Icono={Hand}
+            onPress={() => router.push('/(tabs)/traducir')}
+          />
+        </View>
       </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: COLORS.background },
-  container: { flex: 1, paddingHorizontal: SIZES.padding, paddingTop: 8 },
-  rowBetween: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 },
-  sectionTitle: { fontSize: TYPOGRAPHY.h3, fontWeight: 'bold', color: COLORS.textDark },
-  newLiveBtn: {
-    minHeight: SIZES.touchMin,
-    paddingHorizontal: 14,
-    backgroundColor: COLORS.primary,
-    borderRadius: 12,
+  safeArea: { flex: 1, backgroundColor: COLORES.crema },
+  contenedor: {
+    flex: 1,
+    paddingHorizontal: MEDIDAS.margenPantalla,
+    paddingBottom: 14,
+  },
+  titulo: { ...TIPOGRAFIA.tituloPantalla, color: COLORES.tinta, marginBottom: 6 },
+  meta: { ...TIPOGRAFIA.cuerpo, color: COLORES.tintaSuave },
+  rotulo: {
+    ...TIPOGRAFIA.etiqueta,
+    color: COLORES.tintaSuave,
+    marginTop: 18,
+    marginBottom: 10,
+  },
+  lista: { gap: 12, paddingBottom: 16 },
+  vacio: {
+    flex: 1,
     justifyContent: 'center',
-  },
-  newLiveText: { color: COLORS.surface, fontSize: TYPOGRAPHY.body, fontWeight: 'bold' },
-  emptyBox: {
-    backgroundColor: COLORS.surface,
-    padding: 24,
-    borderRadius: SIZES.radius,
-    borderWidth: 1,
-    borderColor: COLORS.border,
     alignItems: 'center',
+    paddingHorizontal: 16,
+    gap: 10,
   },
-  emptyTitle: { fontSize: TYPOGRAPHY.body, fontWeight: 'bold', color: COLORS.textDark, marginBottom: 4 },
-  emptySub: { fontSize: TYPOGRAPHY.caption, color: COLORS.textSecondary, textAlign: 'center' },
-  sessionCard: {
-    backgroundColor: COLORS.surface,
-    padding: 18,
-    borderRadius: SIZES.radius,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    marginBottom: 12,
-    ...SHADOWS.card,
+  circuloVacio: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: COLORES.azulSuave,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 4,
   },
-  sessionTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
-  dateBadge: {
-    backgroundColor: COLORS.primaryLight,
-    color: COLORS.primary,
-    fontSize: TYPOGRAPHY.caption,
-    fontWeight: 'bold',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
+  tituloVacio: { ...TIPOGRAFIA.subtitulo, color: COLORES.tinta, textAlign: 'center' },
+  textoVacio: {
+    ...TIPOGRAFIA.cuerpo,
+    color: COLORES.tintaSuave,
+    textAlign: 'center',
+    marginBottom: 8,
   },
-  readOnlyTag: { fontSize: TYPOGRAPHY.caption, color: COLORS.secondary, fontWeight: 'bold' },
-  topicTitle: { fontSize: TYPOGRAPHY.h3, fontWeight: 'bold', color: COLORS.textDark, marginBottom: 4 },
-  segmentCount: { fontSize: TYPOGRAPHY.caption, color: COLORS.textSecondary },
-  pressed: { opacity: 0.85 },
+  accionInferior: { paddingTop: 8 },
 });

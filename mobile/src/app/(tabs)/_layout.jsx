@@ -1,35 +1,40 @@
-﻿import { Tabs } from 'expo-router';
-import { Text, Platform } from 'react-native';
+﻿import React from 'react';
+import { View, StyleSheet } from 'react-native';
+import { Tabs } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { COLORS, TYPOGRAPHY } from '../../constants/theme';
+import { BookOpen, Hand, MessageCircle } from 'lucide-react-native';
+import { COLORES } from '../../constants/colores';
+import { TIPOGRAFIA } from '../../constants/tipografia';
+import { MEDIDAS } from '../../constants/medidas';
+
+function IconoPestana({ Icono, focused, color }) {
+  return (
+    <View style={[styles.capsula, focused && styles.capsulaActiva]}>
+      <Icono size={24} strokeWidth={2} color={color} />
+    </View>
+  );
+}
 
 export default function TabsLayout() {
   const insets = useSafeAreaInsets();
-  const bottomPadding = Math.max(insets.bottom, 10);
 
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarHideOnKeyboard: true,
-        tabBarStyle: {
-          backgroundColor: COLORS.surface,
-          borderTopColor: COLORS.border,
-          borderTopWidth: 1,
-          height: 60 + bottomPadding,
-          paddingBottom: bottomPadding,
-          paddingTop: 8,
-        },
-        tabBarItemStyle: {
-          minHeight: 48,
-          justifyContent: 'center',
-        },
-        tabBarActiveTintColor: COLORS.primary,
-        tabBarInactiveTintColor: COLORS.textMuted,
+        tabBarActiveTintColor: COLORES.azul,
+        tabBarInactiveTintColor: COLORES.tintaSuave,
         tabBarLabelStyle: {
-          fontSize: TYPOGRAPHY.caption,
-          fontWeight: '700',
-          marginTop: Platform.OS === 'android' ? 2 : 0,
+          ...TIPOGRAFIA.etiqueta,
+          marginTop: 4,
+        },
+        tabBarStyle: {
+          backgroundColor: COLORES.blanco,
+          borderTopWidth: 1,
+          borderTopColor: COLORES.borde,
+          height: MEDIDAS.altos.barraPestanas + insets.bottom,
+          paddingTop: 6,
+          paddingBottom: Math.max(insets.bottom, 8),
         },
       }}
     >
@@ -37,23 +42,42 @@ export default function TabsLayout() {
         name="index"
         options={{
           title: 'Asignaturas',
-          tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 20 }}>📚</Text>,
+          tabBarIcon: ({ focused, color }) => (
+            <IconoPestana Icono={BookOpen} focused={focused} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="traducir"
         options={{
           title: 'Traducir',
-          tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 20 }}>🤟</Text>,
+          tabBarIcon: ({ focused, color }) => (
+            <IconoPestana Icono={Hand} focused={focused} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="dialogo"
         options={{
           title: 'Diálogo',
-          tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 20 }}>💬</Text>,
+          tabBarIcon: ({ focused, color }) => (
+            <IconoPestana Icono={MessageCircle} focused={focused} color={color} />
+          ),
         }}
       />
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  capsula: {
+    width: 64,
+    height: 32,
+    borderRadius: MEDIDAS.radios.pestana,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  capsulaActiva: {
+    backgroundColor: COLORES.azulSuave,
+  },
+});

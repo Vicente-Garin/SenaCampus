@@ -1,100 +1,129 @@
-﻿import React, { useState } from 'react';
-import { View, Text, TextInput, Pressable, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TextInput, KeyboardAvoidingView, Platform, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { COLORS, TYPOGRAPHY, SIZES, SHADOWS } from '../constants/theme';
+import { Mail, AlertCircle } from 'lucide-react-native';
+import { COLORES } from '../constants/colores';
+import { TIPOGRAFIA } from '../constants/tipografia';
+import { MEDIDAS } from '../constants/medidas';
+import { USUARIO } from '../data/mockData';
+import { Logo } from '../components/Logo';
+import { Boton } from '../components/Boton';
 
-export default function LoginScreen() {
+const DOMINIO = '@alumnos.ulagos.cl';
+
+// Pantalla 3 · Acceso (Figma). Es la ruta "/" y la primera pantalla de la app.
+export default function AccesoScreen() {
   const router = useRouter();
-  const [email, setEmail] = useState('vicente.garin@alumnos.ulagos.cl');
-  const [errorMsg, setErrorMsg] = useState('');
 
-  const handleLogin = () => {
-    if (!email.trim().includes('@')) {
-      setErrorMsg('Ingresa un correo institucional válido.');
+  // TextInput controlado: el valor vive en el estado y se actualiza con cada tecla
+  const [correo, setCorreo] = useState(USUARIO.correo);
+  const [enfocado, setEnfocado] = useState(false);
+  const [error, setError] = useState('');
+
+  const ingresar = () => {
+    // Prevención de errores: solo se acepta el correo institucional
+    if (!correo.trim().toLowerCase().endsWith(DOMINIO)) {
+      setError(`Debe terminar en ${DOMINIO}`);
       return;
     }
-    setErrorMsg('');
+    setError('');
     router.replace('/(tabs)');
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        <View style={styles.badge}>
-          <Text style={styles.badgeText}>SC</Text>
+    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom', 'left', 'right']}>
+      <KeyboardAvoidingView
+        style={styles.flexUno}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <View style={styles.contenedor}>
+          <View style={styles.contenido}>
+            <Logo tamano={64} />
+            <Text style={styles.titulo}>Tus clases, en señas.</Text>
+            <Text style={styles.cuerpo}>
+              Entra con tu cuenta de la universidad. No necesitas una contraseña nueva.
+            </Text>
+
+            <View style={styles.campoGrupo}>
+              <Text style={styles.etiqueta}>Correo institucional</Text>
+              <TextInput
+                value={correo}
+                onChangeText={(texto) => {
+                  setCorreo(texto);
+                  if (error) setError('');
+                }}
+                onFocus={() => setEnfocado(true)}
+                onBlur={() => setEnfocado(false)}
+                placeholder={`nombre${DOMINIO}`}
+                placeholderTextColor={COLORES.tintaSuave}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+                returnKeyType="go"
+                onSubmitEditing={ingresar}
+                accessibilityLabel="Correo institucional"
+                style={[
+                  styles.campo,
+                  enfocado && styles.campoFoco,
+                  !!error && styles.campoError,
+                ]}
+              />
+              {/* El error se comunica con color, ícono y texto (no solo color) */}
+              {error ? (
+                <View style={styles.ayudaFila}>
+                  <AlertCircle size={18} strokeWidth={2} color={COLORES.error} />
+                  <Text style={[styles.ayuda, { color: COLORES.error }]}>{error}</Text>
+                </View>
+              ) : (
+                <Text style={styles.ayuda}>Usa tu correo de la universidad.</Text>
+              )}
+            </View>
+          </View>
+
+          <View style={styles.acciones}>
+            <Boton etiqueta="Continuar con mi correo" tipo="primario" Icono={Mail} onPress={ingresar} />
+            <Boton etiqueta="Continuar con Google" tipo="secundario" onPress={ingresar} />
+            <Boton etiqueta="Continuar con Microsoft" tipo="secundario" onPress={ingresar} />
+            <Text style={styles.legal}>
+              Al continuar aceptas los Términos de uso y la Política de privacidad.
+            </Text>
+          </View>
         </View>
-
-        <Text style={styles.title}>SeñaCampus</Text>
-        <Text style={styles.subtitle}>
-          Tus clases universitarias traducidas en tiempo real a Lengua de Señas Chilena (LSCh).
-        </Text>
-
-        <Text style={styles.label}>Correo institucional</Text>
-        <TextInput
-          style={styles.input}
-          value={email}
-          onChangeText={(text) => {
-            setEmail(text);
-            if (errorMsg) setErrorMsg('');
-          }}
-          placeholder="nombre@alumnos.ulagos.cl"
-          placeholderTextColor={COLORS.textMuted}
-          keyboardType="email-address"
-          autoCapitalize="none"
-        />
-
-        {errorMsg ? <Text style={styles.errorText}>{errorMsg}</Text> : null}
-
-        <Pressable
-          style={({ pressed }) => [styles.primaryBtn, pressed && styles.btnPressed]}
-          onPress={handleLogin}
-        >
-          <Text style={styles.primaryBtnText}>Ingresar a mis clases</Text>
-        </Pressable>
-      </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: COLORS.background },
-  container: { flex: 1, padding: SIZES.padding, justifyContent: 'center' },
-  badge: {
-    width: 64,
-    height: 64,
-    borderRadius: 18,
-    backgroundColor: COLORS.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 20,
-    ...SHADOWS.card,
+  safeArea: { flex: 1, backgroundColor: COLORES.crema },
+  flexUno: { flex: 1 },
+  contenedor: {
+    flex: 1,
+    paddingHorizontal: MEDIDAS.margenPantalla,
+    paddingTop: 40,
+    paddingBottom: 14,
+    justifyContent: 'space-between',
   },
-  badgeText: { color: COLORS.surface, fontSize: 24, fontWeight: 'bold' },
-  title: { fontSize: TYPOGRAPHY.h1, fontWeight: 'bold', color: COLORS.textDark, marginBottom: 8 },
-  subtitle: { fontSize: TYPOGRAPHY.body, color: COLORS.textSecondary, lineHeight: 24, marginBottom: 28 },
-  label: { fontSize: TYPOGRAPHY.body, fontWeight: '600', color: COLORS.textDark, marginBottom: 8 },
-  input: {
-    minHeight: SIZES.touchMin,
-    backgroundColor: COLORS.surface,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: 12,
+  contenido: { gap: 16 },
+  titulo: { ...TIPOGRAFIA.tituloPantalla, color: COLORES.tinta },
+  cuerpo: { ...TIPOGRAFIA.cuerpo, color: COLORES.tintaSuave },
+  campoGrupo: { gap: 8, marginTop: 4 },
+  etiqueta: { ...TIPOGRAFIA.etiqueta, color: COLORES.tinta },
+  campo: {
+    height: 54,
+    backgroundColor: COLORES.blanco,
+    borderWidth: 2,
+    borderColor: COLORES.bordeCampo,
+    borderRadius: MEDIDAS.radios.campo,
     paddingHorizontal: 16,
-    fontSize: TYPOGRAPHY.body,
-    color: COLORS.textDark,
-    marginBottom: 12,
+    ...TIPOGRAFIA.cuerpo,
+    color: COLORES.tinta,
   },
-  errorText: { color: COLORS.error, fontSize: TYPOGRAPHY.caption, marginBottom: 12, fontWeight: '600' },
-  primaryBtn: {
-    minHeight: SIZES.touchMin,
-    backgroundColor: COLORS.primary,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 8,
-    ...SHADOWS.light,
-  },
-  btnPressed: { opacity: 0.85, transform: [{ scale: 0.99 }] },
-  primaryBtnText: { color: COLORS.surface, fontSize: TYPOGRAPHY.body, fontWeight: 'bold' },
+  campoFoco: { borderWidth: 3, borderColor: COLORES.azul },
+  campoError: { borderWidth: 3, borderColor: COLORES.error },
+  ayudaFila: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  ayuda: { ...TIPOGRAFIA.secundario, color: COLORES.tintaSuave },
+  acciones: { gap: 12 },
+  legal: { ...TIPOGRAFIA.secundario, color: COLORES.tintaSuave, textAlign: 'center' },
 });

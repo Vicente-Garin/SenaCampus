@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Modal, View, Text, StyleSheet } from 'react-native';
 import { COLORES } from '../constants/colores';
 import { TIPOGRAFIA } from '../constants/tipografia';
@@ -55,13 +55,11 @@ const styles = StyleSheet.create({
   titulo: {
     ...TIPOGRAFIA.subtitulo,
     color: COLORES.tinta,
-    textAlign: 'center',
     marginBottom: 8,
   },
   mensaje: {
     ...TIPOGRAFIA.cuerpo,
     color: COLORES.tintaSuave,
-    textAlign: 'center',
     marginBottom: 20,
   },
   acciones: {
