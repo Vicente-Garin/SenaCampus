@@ -2,11 +2,11 @@ import React from 'react';
 import { View, Text, FlatList, Pressable, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { BookOpen, Hand, SlidersHorizontal } from 'lucide-react-native';
+import { BookOpen, Hand, SlidersHorizontal, Plus } from 'lucide-react-native';
 import { COLORES } from '../../constants/colores';
 import { TIPOGRAFIA } from '../../constants/tipografia';
 import { MEDIDAS } from '../../constants/medidas';
-import { ASIGNATURAS, USUARIO } from '../../data/mockData';
+import { USUARIO } from '../../data/mockData';
 import { Aviso } from '../../components/Aviso';
 import { Tarjeta } from '../../components/Tarjeta';
 import { Boton } from '../../components/Boton';
@@ -15,7 +15,7 @@ import { useClases } from '../../context/ClasesContext';
 export default function AsignaturasScreen() {
   const router = useRouter();
   // El contador de clases sale del estado compartido: sube al guardar una clase
-  const { clasesPorAsignatura } = useClases();
+  const { asignaturas, clasesPorAsignatura } = useClases();
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
@@ -45,10 +45,22 @@ export default function AsignaturasScreen() {
           style={styles.aviso}
         />
 
-        <Text style={styles.rotulo}>TUS ASIGNATURAS</Text>
+        {/* Rótulo de la lista + acción ocasional "Agregar" junto a la lista que modifica */}
+        <View style={styles.filaRotulo}>
+          <Text style={styles.rotulo}>TUS ASIGNATURAS</Text>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Agregar asignatura"
+            onPress={() => router.push('/nueva-asignatura')}
+            style={({ pressed }) => [styles.botonAgregar, pressed && { backgroundColor: COLORES.azulSuave }]}
+          >
+            <Plus size={20} strokeWidth={2} color={COLORES.azul} />
+            <Text style={styles.textoAgregar}>Agregar</Text>
+          </Pressable>
+        </View>
 
         <FlatList
-          data={ASIGNATURAS}
+          data={asignaturas}
           keyExtractor={(item) => item.id}
           extraData={clasesPorAsignatura}
           contentContainerStyle={styles.lista}
@@ -109,11 +121,26 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   aviso: { marginBottom: 18 },
+  filaRotulo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+  },
   rotulo: {
     ...TIPOGRAFIA.etiqueta,
     color: COLORES.tintaSuave,
-    marginBottom: 10,
   },
+  botonAgregar: {
+    minHeight: MEDIDAS.altos.tactilMin, // 44 pt de área táctil
+    paddingHorizontal: 12,
+    borderRadius: MEDIDAS.radios.chip,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginRight: -12,
+  },
+  textoAgregar: { ...TIPOGRAFIA.cuerpoDestacado, color: COLORES.azul },
   lista: { gap: 12, paddingBottom: 16 },
   accionInferior: { paddingTop: 8 },
 });

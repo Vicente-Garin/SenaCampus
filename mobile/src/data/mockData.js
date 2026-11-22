@@ -14,7 +14,6 @@ export const ASIGNATURAS = [
     sala: 'B-204',
     profesor: 'Prof. Andrés Morales',
     horario: 'Lunes y miércoles, 10:15',
-    clasesGuardadas: 6,
   },
   {
     id: 'bd2',
@@ -22,7 +21,6 @@ export const ASIGNATURAS = [
     sala: 'A-110',
     profesor: 'Prof. Paula Vera',
     horario: 'Martes, 08:30',
-    clasesGuardadas: 4,
   },
   {
     id: 'isw',
@@ -30,7 +28,6 @@ export const ASIGNATURAS = [
     sala: 'C-302',
     profesor: 'Prof. Rodrigo Soto',
     horario: 'Jueves, 14:30',
-    clasesGuardadas: 5,
   },
 ];
 
@@ -60,9 +57,23 @@ export const CLASES_POR_ASIGNATURA = {
       palabras: 10105,
       deletreadas: [],
     },
+    { id: 'c06', asignaturaId: 'twm', fecha: 'Clase del 6 de noviembre', duracion: '1 h 18 min', palabras: 9320, deletreadas: [] },
+    { id: 'c04', asignaturaId: 'twm', fecha: 'Clase del 4 de noviembre', duracion: '1 h 10 min', palabras: 8475, deletreadas: [] },
+    { id: 'c30', asignaturaId: 'twm', fecha: 'Clase del 30 de octubre', duracion: '1 h 21 min', palabras: 9910, deletreadas: [] },
   ],
-  bd2: [],
-  isw: [],
+  bd2: [
+    { id: 'b17', asignaturaId: 'bd2', fecha: 'Clase del 17 de noviembre', duracion: '1 h 25 min', palabras: 10240, deletreadas: [] },
+    { id: 'b10', asignaturaId: 'bd2', fecha: 'Clase del 10 de noviembre', duracion: '1 h 20 min', palabras: 9605, deletreadas: [] },
+    { id: 'b03', asignaturaId: 'bd2', fecha: 'Clase del 3 de noviembre', duracion: '1 h 15 min', palabras: 8890, deletreadas: [] },
+    { id: 'b27', asignaturaId: 'bd2', fecha: 'Clase del 27 de octubre', duracion: '1 h 22 min', palabras: 9785, deletreadas: [] },
+  ],
+  isw: [
+    { id: 'i20', asignaturaId: 'isw', fecha: 'Clase del 20 de noviembre', duracion: '1 h 30 min', palabras: 10870, deletreadas: [] },
+    { id: 'i13', asignaturaId: 'isw', fecha: 'Clase del 13 de noviembre', duracion: '1 h 24 min', palabras: 10150, deletreadas: [] },
+    { id: 'i06', asignaturaId: 'isw', fecha: 'Clase del 6 de noviembre', duracion: '1 h 28 min', palabras: 10430, deletreadas: [] },
+    { id: 'i30', asignaturaId: 'isw', fecha: 'Clase del 30 de octubre', duracion: '1 h 19 min', palabras: 9510, deletreadas: [] },
+    { id: 'i23', asignaturaId: 'isw', fecha: 'Clase del 23 de octubre', duracion: '1 h 26 min', palabras: 10260, deletreadas: [] },
+  ],
 };
 
 export const TRANSCRIPCIONES = {

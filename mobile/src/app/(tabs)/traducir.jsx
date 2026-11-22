@@ -1,12 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { View, Text, ScrollView, FlatList, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useRouter, useLocalSearchParams, useNavigation, useFocusEffect } from 'expo-router';
 import { Mic, RotateCcw, Gauge, Pause, Play, Square, BookOpen } from 'lucide-react-native';
 import { COLORES } from '../../constants/colores';
 import { TIPOGRAFIA } from '../../constants/tipografia';
 import { MEDIDAS } from '../../constants/medidas';
-import { SUBTITULOS_EN_VIVO, SENAS_PROXIMAS, ASIGNATURAS } from '../../data/mockData';
+import { SUBTITULOS_EN_VIVO, SENAS_PROXIMAS } from '../../data/mockData';
 import { useClases } from '../../context/ClasesContext';
 import { Chip } from '../../components/Chip';
 import { VisorSenas } from '../../components/VisorSenas';
@@ -18,11 +18,12 @@ const VELOCIDADES = ['0.75x', '1x', '1.5x'];
 
 export default function TraducirScreen() {
   const router = useRouter();
-  const { guardarClase } = useClases();
+  const { guardarClase, asignaturas } = useClases();
+  const navigation = useNavigation();
 
   // La asignatura llega como parámetro desde Asignaturas o desde el Detalle
   const { asignaturaId } = useLocalSearchParams();
-  const asignatura = ASIGNATURAS.find((a) => a.id === asignaturaId) || ASIGNATURAS[0];
+  const asignatura = asignaturas.find((a) => a.id === asignaturaId) || asignaturas[0];
   // Sin asignatura elegida no se traduce: primero se pregunta qué clase es
   const hayClaseElegida = !!asignaturaId;
 
@@ -73,6 +74,17 @@ export default function TraducirScreen() {
     setIndiceSubtitulo(0);
   }, [asignatura.id]);
 
+  // Al salir de Traducir sin terminar, se olvida la asignatura elegida.
+  // useFocusEffect ejecuta la función de limpieza (return) cuando la pantalla pierde el foco,
+  // así la próxima vez que se toque la pestaña vuelve a preguntar qué clase traducir.
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        navigation.setParams({ asignaturaId: undefined });
+      };
+    }, [navigation])
+  );
+
   // Guarda la clase en el estado compartido y abre el resumen de ESA clase
   const terminarYGuardar = () => {
     const fragmentos = fragmentosRef.current.length
@@ -88,7 +100,7 @@ export default function TraducirScreen() {
     setModalVisible(false);
     setEscuchando(true);
     // Se borra la asignatura elegida: la próxima vez la pestaña vuelve a preguntar
-    router.setParams({ asignaturaId: undefined });
+    navigation.setParams({ asignaturaId: undefined });
     router.push({ pathname: '/resumen', params: { claseId: id } });
   };
 
@@ -119,7 +131,7 @@ export default function TraducirScreen() {
             Elige la asignatura para guardar la transcripción en su historial.
           </Text>
           <FlatList
-            data={ASIGNATURAS}
+            data={asignaturas}
             keyExtractor={(item) => item.id}
             contentContainerStyle={styles.listaSeleccion}
             renderItem={({ item }) => (
@@ -127,7 +139,7 @@ export default function TraducirScreen() {
                 titulo={item.nombre}
                 detalle={`Sala ${item.sala} · ${item.horario}`}
                 Icono={BookOpen}
-                onPress={() => router.setParams({ asignaturaId: item.id })}
+                onPress={() => navigation.setParams({ asignaturaId: item.id })}
               />
             )}
           />

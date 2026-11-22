@@ -4,7 +4,7 @@
 * **Estudiante:** Vicente Martín Garín Pereda
 * **Avance:** Avance N°1 — Diseño UI/UX y Frontend Móvil (React Native + Expo SDK 58)
 * **Repositorio:** [GitHub — SenaCampus](https://github.com/Vicente-Garin/SenaCampus)
-* **Archivo de Figma:** [señaCampus en Figma](https://www.figma.com/design/bCv8y8gXMaHy6oLUagS4PI/se%C3%B1aCampus?node-id=3-362&t=3c6s7hihCM2XMi2I-1) — páginas `00 · Identidad y UI Kit`, `01 · Wireframes, storyboard y flujo` y `02 · Alta fidelidad y prototipo` (para navegar, presionar ▶ Play en la página 02; el flujo empieza en «1 Splash»).
+* **Archivo de Figma:** [señaCampus en Figma](https://www.figma.com/design/bCv8y8gXMaHy6oLUagS4PI/se%C3%B1aCampus?node-id=3-362&t=3c6s7hihCM2XMi2I-1) — páginas `00 · Identidad y UI Kit`, `01 · Wireframes, storyboard y flujo` y `02 · Alta fidelidad y prototipo` (para navegar, presionar ▶ Play en la página 02; el flujo empieza en «1 Splash»). Son 18 pantallas de alta fidelidad con sus wireframes.
 
 ---
 
@@ -69,23 +69,26 @@ Vicente (personaje de ejemplo que representa a un estudiante sordo) sigue una cl
 ![Storyboard SeñaCampus](./img/storyboard.png)
 
 ### Mapa de navegación
-Tres pestañas inferiores (**Asignaturas**, **Traducir**, **Diálogo**), pilas de pantallas que se abren encima y estados de la traducción (conectando, sin conexión, micrófono bloqueado, palabra sin seña).
+Tres pestañas inferiores (**Asignaturas**, **Traducir**, **Diálogo**), pilas de pantallas que se abren encima y estados de la traducción (conectando, sin conexión, micrófono bloqueado, palabra sin seña). La pantalla 17 (**Nueva asignatura**) se abre con «+ Agregar» en Asignaturas, y la 18 (**Elegir clase**) aparece si se toca la pestaña Traducir sin haber elegido una asignatura: así cada clase traducida queda guardada en la asignatura correcta.
 
 ![Mapa de navegación](./img/mapa-navegacion.png)
 
 ### Rutas en la app (Expo Router — `mobile/src/app/`)
+
+El estado compartido de asignaturas y clases vive en `src/context/ClasesContext.jsx` y envuelve a todas las rutas desde `_layout.jsx`.
 
     src/app/
     ├── _layout.jsx            # Stack raíz: carga de la fuente Nunito + SafeAreaProvider
     ├── index.jsx              # Acceso (login con correo institucional)
     ├── ajustes.jsx            # Ajustes (se abre desde Asignaturas)
     ├── resumen.jsx            # Resumen de sesión (después de terminar la clase)
+    ├── nueva-asignatura.jsx   # Formulario para crear una asignatura
     ├── asignatura/[id].jsx    # Ruta dinámica: detalle de asignatura e historial
     ├── clase/[id].jsx         # Ruta dinámica: transcripción guardada
     └── (tabs)/
         ├── _layout.jsx        # Barra de pestañas (respeta la barra de gestos)
         ├── index.jsx          # Pestaña 1: Asignaturas (inicio)
-        ├── traducir.jsx       # Pestaña 2: Traducción en clase
+        ├── traducir.jsx       # Pestaña 2: elegir clase y traducirla en vivo
         └── dialogo.jsx        # Pestaña 3: Modo diálogo
 
 ---
@@ -100,6 +103,7 @@ Los wireframes son de baja fidelidad, en escala de grises y en marcos de 390 × 
 | **Traducción en clase** | ![Wireframe Traducir](./img/wf-traducir.png) | ![Mockup Traducir](./img/mk-traducir.png) |
 | **Transcripción guardada** | ![Wireframe Transcripción](./img/wf-sesion.png) | ![Mockup Transcripción](./img/mk-sesion.png) |
 | **Modo diálogo** | ![Wireframe Diálogo](./img/wf-dialogo.png) | ![Mockup Diálogo](./img/mk-dialogo.png) |
+| **Nueva asignatura** | ![Wireframe Nueva asignatura](./img/wf-nueva-asignatura.png) | ![Mockup Nueva asignatura](./img/mk-nueva-asignatura.png) |
 
 Cambios principales entre ambas versiones: el visor de señas pasó de un rectángulo gris a un intérprete en Azul profundo sobre Durazno; los placeholders (`[Nombre]`, `[Asignatura]`) se reemplazaron por datos reales; las acciones principales se agruparon abajo; y los chips se agrandaron a 44 pt para cumplir el área táctil mínima.
 
@@ -109,9 +113,9 @@ Cambios principales entre ambas versiones: el visor de señas pasó de un rectá
 
 Capturas tomadas en el teléfono con la app corriendo en **Expo Go**:
 
-| Acceso | Asignaturas | Detalle de asignatura |
-| :---: | :---: | :---: |
-| ![App Acceso](./img/app-acceso.png) | ![App Asignaturas](./img/app-asignaturas.png) | ![App Detalle](./img/app-detalle.png) |
+| Acceso | Asignaturas | Nueva asignatura | Detalle de asignatura |
+| :---: | :---: | :---: | :---: |
+| ![App Acceso](./img/app-acceso.png) | ![App Asignaturas](./img/app-asignaturas.png) | ![App Nueva asignatura](./img/app-nueva-asignatura.png) | ![App Detalle](./img/app-detalle.png) |
 
 | Traducción en clase | Modo diálogo | Ajustes |
 | :---: | :---: | :---: |
@@ -119,7 +123,8 @@ Capturas tomadas en el teléfono con la app corriendo en **Expo Go**:
 
 Interacciones reales de cada interfaz:
 * **Acceso:** `TextInput` controlado con validación del correo `@alumnos.ulagos.cl` (borde y mensaje de error si no corresponde).
-* **Asignaturas:** lista con `FlatList`; al tocar una tarjeta se navega a `asignatura/[id]` pasando el `id` como parámetro; el botón de ajustes abre `ajustes.jsx`.
+* **Asignaturas:** lista con `FlatList`; al tocar una tarjeta se navega a `asignatura/[id]` pasando el `id` como parámetro; el botón de ajustes abre `ajustes.jsx` y «+ Agregar» abre el formulario de nueva asignatura.
+* **Nueva asignatura:** cuatro `TextInput` controlados (componente `CampoTexto`); el nombre es obligatorio y, si falta, el campo se marca en rojo con ícono y mensaje. Al guardar, `agregarAsignatura()` la suma al estado compartido y se abre su detalle, que muestra el estado vacío «Aún no hay clases guardadas».
 * **Traducción en clase:** solo se traduce dentro de una asignatura: si se entra desde la pestaña sin elegir clase, primero pregunta «¿Qué clase vas a traducir?»; desde una asignatura llega con su `id` como parámetro. Pausar/Reanudar detiene o reanuda los subtítulos (`useState` + `setInterval` en `useEffect`); el chip de velocidad rota entre 0.75x, 1x y 1.5x; Terminar pide confirmación y **guarda la clase**.
 * **Guardado de clases (estado compartido):** `src/context/ClasesContext.jsx` vive en el layout raíz. `guardarClase()` crea la clase nueva y actualiza el estado; como Asignaturas, Detalle, Resumen y Transcripción leen ese mismo estado con `useClases()`, React las vuelve a dibujar y la clase aparece en el historial y en el contador.
 * **Modo diálogo:** `TextInput` controlado; al enviar se agrega una burbuja a la lista y el botón queda deshabilitado si el campo está vacío.
@@ -129,7 +134,8 @@ Interacciones reales de cada interfaz:
 
 ## 5. Justificación Técnica y Ergonómica
 
-1. **Una acción principal por pantalla, abajo:** la persona sorda reparte la atención entre el profesor, la pizarra y el celular. Por eso cada pantalla tiene un solo botón Coral (el más visible) y queda en la zona del pulgar, justo encima de la barra de pestañas. Esto reduce la carga cognitiva: no tiene que buscar qué hacer.
+1. **Una acción principal por pantalla, abajo; las ocasionales, junto a lo que modifican:** «+ Agregar» va al lado de la lista de asignaturas (crear asignaturas se hace pocas veces), mientras que «Retomar» —lo que se usa cada día— queda abajo, al alcance del pulgar.
+    la persona sorda reparte la atención entre el profesor, la pizarra y el celular. Por eso cada pantalla tiene un solo botón Coral (el más visible) y queda en la zona del pulgar, justo encima de la barra de pestañas. Esto reduce la carga cognitiva: no tiene que buscar qué hacer.
 2. **Jerarquía en la traducción en vivo:** de arriba hacia abajo va el estado («Escuchando · es-CL»), el visor de señas (lo más grande), los controles (repetir y velocidad), las próximas señas (completada en verde, actual en azul) y los subtítulos con las palabras clave en negrita azul. Lo más importante está donde llega primero la mirada.
 3. **Tamaños táctiles:** botones de 54 pt, chips de 44 pt, tarjetas de 76 pt y filas de ajuste de 64 pt; toda el área de la tarjeta o fila es tocable, no solo el texto. Todo supera el mínimo de 44 pt (48 dp).
 4. **Zonas seguras:** `SafeAreaView` y `useSafeAreaInsets` evitan el notch y la barra de gestos; la barra de pestañas suma el `inset` inferior.

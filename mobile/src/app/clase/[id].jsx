@@ -61,7 +61,13 @@ export default function TranscripcionGuardadaScreen() {
         )}
 
         <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
-          <View style={styles.cajaTranscripcion}>
+          {fragmentos.length === 0 && (
+            <Aviso
+              tipo="info"
+              mensaje="Esta clase de ejemplo no tiene la transcripción cargada. Las clases que traduzcas sí la guardan."
+            />
+          )}
+          <View style={[styles.cajaTranscripcion, fragmentos.length === 0 && { display: 'none' }]}>
             {fragmentos.map((frag, idx) => (
               <View key={idx} style={styles.fragmento}>
                 <Text style={styles.hora}>{frag.hora}</Text>

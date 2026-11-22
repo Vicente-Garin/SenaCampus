@@ -53,17 +53,18 @@ Aplicación móvil desarrollada en **React Native con Expo (SDK 58)** para apoya
             │   ├── index.jsx            # Acceso con correo institucional
             │   ├── ajustes.jsx          # Ajustes de accesibilidad
             │   ├── resumen.jsx          # Resumen al terminar la clase
+            │   ├── nueva-asignatura.jsx # Formulario para crear una asignatura
             │   ├── asignatura/[id].jsx  # Detalle de asignatura e historial
             │   ├── clase/[id].jsx       # Transcripción guardada
             │   └── (tabs)/
             │       ├── _layout.jsx      # Barra de pestañas
             │       ├── index.jsx        # Asignaturas (inicio)
-            │       ├── traducir.jsx     # Traducción en clase
+            │       ├── traducir.jsx     # Elegir clase y traducirla en vivo
             │       └── dialogo.jsx      # Modo diálogo
-            ├── components/              # Aviso, BarraSuperior, Boton, Burbuja, Chip, FilaAjuste,
-            │                            # Logo, Tarjeta, VentanaConfirmacion, VisorSenas
+            ├── components/              # Aviso, BarraSuperior, Boton, Burbuja, CampoTexto, Chip,
+            │                            # FilaAjuste, Logo, Tarjeta, VentanaConfirmacion, VisorSenas
             ├── constants/               # colores.js, medidas.js, tipografia.js
-            ├── context/                 # ClasesContext.jsx (clases guardadas compartidas)
+            ├── context/                 # ClasesContext.jsx (asignaturas y clases compartidas)
             ├── data/                    # mockData.js
             └── services/                # api.js
 
@@ -107,10 +108,10 @@ Requiere **Docker Desktop**. Desde la raíz del repositorio:
 
 ## Capturas
 
-| Acceso | Asignaturas | Detalle de asignatura |
-| :---: | :---: | :---: |
-| ![Acceso](./docs/img/app-acceso.png) | ![Asignaturas](./docs/img/app-asignaturas.png) | ![Detalle](./docs/img/app-detalle.png) |
+| Acceso | Asignaturas | Nueva asignatura | Detalle de asignatura |
+| :---: | :---: | :---: | :---: |
+| ![App Acceso](./docs/img/app-acceso.png) | ![App Asignaturas](./docs/img/app-asignaturas.png) | ![App Nueva asignatura](./docs/img/app-nueva-asignatura.png) | ![App Detalle](./docs/img/app-detalle.png) |
 
 | Traducción en clase | Modo diálogo | Ajustes |
 | :---: | :---: | :---: |
-| ![Traducir](./docs/img/app-traducir.png) | ![Diálogo](./docs/img/app-dialogo.png) | ![Ajustes](./docs/img/app-ajustes.png) |
+| ![App Traducir](./docs/img/app-traducir.png) | ![App Diálogo](./docs/img/app-dialogo.png) | ![App Ajustes](./docs/img/app-ajustes.png) |

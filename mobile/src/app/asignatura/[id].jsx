@@ -6,7 +6,6 @@ import { Clock, Hand, Inbox } from 'lucide-react-native';
 import { COLORES } from '../../constants/colores';
 import { TIPOGRAFIA } from '../../constants/tipografia';
 import { MEDIDAS } from '../../constants/medidas';
-import { ASIGNATURAS } from '../../data/mockData';
 import { useClases } from '../../context/ClasesContext';
 import { BarraSuperior } from '../../components/BarraSuperior';
 import { Tarjeta } from '../../components/Tarjeta';
@@ -16,9 +15,9 @@ export default function DetalleAsignaturaScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
 
-  const asignatura = ASIGNATURAS.find((a) => a.id === id) || ASIGNATURAS[0];
-  // Historial desde el estado compartido: incluye las clases recién guardadas
-  const { clasesPorAsignatura } = useClases();
+  // Asignatura e historial desde el estado compartido (incluye las recién creadas)
+  const { asignaturas, clasesPorAsignatura } = useClases();
+  const asignatura = asignaturas.find((a) => a.id === id) || asignaturas[0];
   const clases = clasesPorAsignatura[asignatura.id] || [];
 
   return (

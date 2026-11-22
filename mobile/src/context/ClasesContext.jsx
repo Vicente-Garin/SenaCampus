@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState } from 'react';
-import { CLASES_POR_ASIGNATURA, TRANSCRIPCIONES } from '../data/mockData';
+import { ASIGNATURAS, CLASES_POR_ASIGNATURA, TRANSCRIPCIONES } from '../data/mockData';
 
-// Estado compartido de las clases guardadas.
+// Estado compartido de las asignaturas y de las clases guardadas.
 // Vive en el layout raíz (src/app/_layout.jsx), así que todas las pantallas leen
 // los mismos datos: lo que se guarda en Traducir aparece en el Detalle de la asignatura.
 
@@ -22,6 +22,7 @@ function formatearDuracion(segundos) {
 
 export function ClasesProvider({ children }) {
   // Valores iniciales: los datos de ejemplo de mockData.js
+  const [asignaturas, setAsignaturas] = useState(ASIGNATURAS);
   const [clasesPorAsignatura, setClasesPorAsignatura] = useState(CLASES_POR_ASIGNATURA);
   const [transcripciones, setTranscripciones] = useState(TRANSCRIPCIONES);
 
@@ -57,6 +58,24 @@ export function ClasesProvider({ children }) {
     return id;
   };
 
+  /**
+   * Crea una asignatura nueva (desde la pantalla Nueva asignatura) y devuelve su id.
+   * Solo el nombre es obligatorio; lo demás queda "Por definir" si viene vacío.
+   */
+  const agregarAsignatura = ({ nombre, sala, profesor, horario }) => {
+    const id = `a-${Date.now()}`;
+    const nueva = {
+      id,
+      nombre: nombre.trim(),
+      sala: sala.trim() || 'Por definir',
+      profesor: profesor.trim() || 'Profesor/a por definir',
+      horario: horario.trim() || 'Horario por definir',
+    };
+    setAsignaturas((prev) => [...prev, nueva]);
+    setClasesPorAsignatura((prev) => ({ ...prev, [id]: [] })); // empieza sin clases
+    return id;
+  };
+
   // Busca una clase por su id en todas las asignaturas
   const buscarClase = (id) => {
     for (const lista of Object.values(clasesPorAsignatura)) {
@@ -67,7 +86,7 @@ export function ClasesProvider({ children }) {
   };
 
   return (
-    <ClasesContext.Provider value={{ clasesPorAsignatura, transcripciones, guardarClase, buscarClase }}>
+    <ClasesContext.Provider value={{ asignaturas, agregarAsignatura, clasesPorAsignatura, transcripciones, guardarClase, buscarClase }}>
       {children}
     </ClasesContext.Provider>
   );
