@@ -18,7 +18,7 @@ Aplicación móvil desarrollada en **React Native con Expo (SDK 58)** para apoya
 ## Stack tecnológico
 
 * **Framework móvil:** React Native + Expo SDK 58 (probado en Expo Go)
-* **Navegación:** Expo Router (`src/app/`) con layout raíz en pila, pestañas inferiores y rutas dinámicas (`asignatura/[id]`, `clase/[id]`)
+* **Navegación:** Expo Router (`src/app/`) con layout raíz en pila, pestañas inferiores y rutas dinámicas (`asignatura/[id]`, `clase/[id]`); se navega con `<Link>` y con `router.push` / `router.replace` / `router.back`, y los parámetros se leen con `useLocalSearchParams`
 * **Estado:** hooks de React (`useState`, `useEffect`, `useRef`), estado compartido con Context (`ClasesContext`) y datos de ejemplo en `src/data/mockData.js`
 * **Componentes nativos:** `FlatList` (listas), `Pressable` (toques con estado presionado), `TextInput` controlado, `Modal`, `Switch`, `SafeAreaView` / `useSafeAreaInsets`
 * **Diseño:** colores, tipografía (Nunito) y medidas centralizados en `src/constants/`, iguales a los estilos del Figma; íconos `lucide-react-native`; logo SVG con `react-native-svg`
@@ -69,6 +69,15 @@ Aplicación móvil desarrollada en **React Native con Expo (SDK 58)** para apoya
             └── services/                # api.js
 
 ---
+
+## Funcionalidades del Avance N°1
+
+* **Acceso** con correo institucional y validación del dominio `@alumnos.ulagos.cl`.
+* **Asignaturas:** lista con contador de clases guardadas y **creación de asignaturas** con formulario validado.
+* **Traducción en vivo** (simulada): se elige la asignatura, avanzan los subtítulos y las señas, se puede pausar y cambiar la velocidad; al terminar, la clase **se guarda** y aparece en el historial.
+* **Historial y transcripción** de cada clase en modo solo lectura.
+* **Modo diálogo** para conversar por texto fuera de clase.
+* **Ajustes** de accesibilidad (texto grande, subtítulos, vibración y velocidad de las señas).
 
 ## Backend y base de datos
 
