@@ -10,9 +10,12 @@ import { ASIGNATURAS, USUARIO } from '../../data/mockData';
 import { Aviso } from '../../components/Aviso';
 import { Tarjeta } from '../../components/Tarjeta';
 import { Boton } from '../../components/Boton';
+import { useClases } from '../../context/ClasesContext';
 
 export default function AsignaturasScreen() {
   const router = useRouter();
+  // El contador de clases sale del estado compartido: sube al guardar una clase
+  const { clasesPorAsignatura } = useClases();
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
@@ -47,12 +50,13 @@ export default function AsignaturasScreen() {
         <FlatList
           data={ASIGNATURAS}
           keyExtractor={(item) => item.id}
+          extraData={clasesPorAsignatura}
           contentContainerStyle={styles.lista}
           showsVerticalScrollIndicator={false}
           renderItem={({ item }) => (
             <Tarjeta
               titulo={item.nombre}
-              detalle={`${item.sala} · ${item.clasesGuardadas} clases guardadas`}
+              detalle={`${item.sala} · ${(clasesPorAsignatura[item.id] || []).length} clases guardadas`}
               Icono={BookOpen}
               onPress={() => router.push(`/asignatura/${item.id}`)}
             />
@@ -64,7 +68,9 @@ export default function AsignaturasScreen() {
             etiqueta="Retomar Tecnologías Web"
             tipo="primario"
             Icono={Hand}
-            onPress={() => router.push('/(tabs)/traducir')}
+            onPress={() =>
+              router.push({ pathname: '/(tabs)/traducir', params: { asignaturaId: 'twm' } })
+            }
           />
         </View>
       </View>

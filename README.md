@@ -19,7 +19,7 @@ Aplicación móvil desarrollada en **React Native con Expo (SDK 58)** para apoya
 
 * **Framework móvil:** React Native + Expo SDK 58 (probado en Expo Go)
 * **Navegación:** Expo Router (`src/app/`) con layout raíz en pila, pestañas inferiores y rutas dinámicas (`asignatura/[id]`, `clase/[id]`)
-* **Estado:** hooks de React (`useState`, `useEffect`, `useRef`) y datos de ejemplo en `src/data/mockData.js`
+* **Estado:** hooks de React (`useState`, `useEffect`, `useRef`), estado compartido con Context (`ClasesContext`) y datos de ejemplo en `src/data/mockData.js`
 * **Componentes nativos:** `FlatList` (listas), `Pressable` (toques con estado presionado), `TextInput` controlado, `Modal`, `Switch`, `SafeAreaView` / `useSafeAreaInsets`
 * **Diseño:** colores, tipografía (Nunito) y medidas centralizados en `src/constants/`, iguales a los estilos del Figma; íconos `lucide-react-native`; logo SVG con `react-native-svg`
 * **Backend:** Node.js + Express + Mongoose, MongoDB en Docker; cliente HTTP preparado en `mobile/src/services/api.js`
@@ -63,6 +63,7 @@ Aplicación móvil desarrollada en **React Native con Expo (SDK 58)** para apoya
             ├── components/              # Aviso, BarraSuperior, Boton, Burbuja, Chip, FilaAjuste,
             │                            # Logo, Tarjeta, VentanaConfirmacion, VisorSenas
             ├── constants/               # colores.js, medidas.js, tipografia.js
+            ├── context/                 # ClasesContext.jsx (clases guardadas compartidas)
             ├── data/                    # mockData.js
             └── services/                # api.js
 

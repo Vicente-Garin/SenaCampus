@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -6,7 +6,7 @@ import { Copy, Hand } from 'lucide-react-native';
 import { COLORES } from '../../constants/colores';
 import { TIPOGRAFIA } from '../../constants/tipografia';
 import { MEDIDAS } from '../../constants/medidas';
-import { TRANSCRIPCIONES } from '../../data/mockData';
+import { useClases } from '../../context/ClasesContext';
 import { BarraSuperior } from '../../components/BarraSuperior';
 import { Boton } from '../../components/Boton';
 import { Aviso } from '../../components/Aviso';
@@ -32,7 +32,11 @@ export default function TranscripcionGuardadaScreen() {
   const router = useRouter();
   const [copiado, setCopiado] = useState(false);
 
-  const fragmentos = TRANSCRIPCIONES[id] || TRANSCRIPCIONES.c18;
+  // Datos de la clase desde el estado compartido (incluye las recién guardadas)
+  const { transcripciones, buscarClase } = useClases();
+  const clase = buscarClase(id) || buscarClase('c18');
+  const fragmentos = transcripciones[clase.id] || [];
+  const deletreadas = clase.deletreadas || [];
 
   const manejarCopiar = () => {
     setCopiado(true);
@@ -43,12 +47,14 @@ export default function TranscripcionGuardadaScreen() {
     <SafeAreaView style={styles.safeArea} edges={['top', 'bottom', 'left', 'right']}>
       <View style={styles.contenedor}>
         <BarraSuperior
-          textoVolver="Tecnologías Web"
+          textoVolver="Historial"
           accion={{ Icono: Copy, etiqueta: 'Copiar texto', onPress: manejarCopiar }}
         />
 
-        <Text style={styles.titulo}>Clase del 18 de noviembre</Text>
-        <Text style={styles.meta}>1 h 20 min · 3 palabras deletreadas</Text>
+        <Text style={styles.titulo}>{clase.fecha}</Text>
+        <Text style={styles.meta}>
+          {clase.duracion} · {deletreadas.length} palabras deletreadas
+        </Text>
 
         {copiado && (
           <Aviso tipo="exito" mensaje="Texto copiado" style={styles.avisoCopiado} />

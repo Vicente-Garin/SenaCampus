@@ -1,6 +1,7 @@
-﻿import React, { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { ClasesProvider } from '../context/ClasesContext';
 import * as SplashScreen from 'expo-splash-screen';
 import {
   useFonts,
@@ -29,7 +30,10 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <Stack screenOptions={{ headerShown: false }} />
+      {/* ClasesProvider comparte las clases guardadas con todas las pantallas */}
+      <ClasesProvider>
+        <Stack screenOptions={{ headerShown: false }} />
+      </ClasesProvider>
     </SafeAreaProvider>
   );
 }

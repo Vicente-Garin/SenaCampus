@@ -1,21 +1,35 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, ScrollView, FlatList, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
-import { Mic, RotateCcw, Gauge, Pause, Play, Square } from 'lucide-react-native';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { Mic, RotateCcw, Gauge, Pause, Play, Square, BookOpen } from 'lucide-react-native';
 import { COLORES } from '../../constants/colores';
 import { TIPOGRAFIA } from '../../constants/tipografia';
 import { MEDIDAS } from '../../constants/medidas';
-import { SUBTITULOS_EN_VIVO, SENAS_PROXIMAS } from '../../data/mockData';
+import { SUBTITULOS_EN_VIVO, SENAS_PROXIMAS, ASIGNATURAS } from '../../data/mockData';
+import { useClases } from '../../context/ClasesContext';
 import { Chip } from '../../components/Chip';
 import { VisorSenas } from '../../components/VisorSenas';
 import { Boton } from '../../components/Boton';
 import { VentanaConfirmacion } from '../../components/VentanaConfirmacion';
+import { Tarjeta } from '../../components/Tarjeta';
 
 const VELOCIDADES = ['0.75x', '1x', '1.5x'];
 
 export default function TraducirScreen() {
   const router = useRouter();
+  const { guardarClase } = useClases();
+
+  // La asignatura llega como parámetro desde Asignaturas o desde el Detalle
+  const { asignaturaId } = useLocalSearchParams();
+  const asignatura = ASIGNATURAS.find((a) => a.id === asignaturaId) || ASIGNATURAS[0];
+  // Sin asignatura elegida no se traduce: primero se pregunta qué clase es
+  const hayClaseElegida = !!asignaturaId;
+
+  // useRef guarda datos que NO necesitan redibujar la pantalla:
+  // la hora de inicio de la sesión y las frases ya traducidas
+  const inicioRef = useRef(Date.now());
+  const fragmentosRef = useRef([]);
 
   const [escuchando, setEscuchando] = useState(true);
   const [indiceVelocidad, setIndiceVelocidad] = useState(1); // 1x por defecto
@@ -25,14 +39,58 @@ export default function TraducirScreen() {
 
   // Simula el avance de subtítulos en vivo cada 1,5 s y limpia el intervalo al desmontar
   useEffect(() => {
-    if (!escuchando) return;
+    if (!escuchando || !hayClaseElegida) return;
     const intervalo = setInterval(() => {
       setIndiceSubtitulo((prev) => (prev + 1) % SUBTITULOS_EN_VIVO.length);
     }, 1500);
     return () => clearInterval(intervalo);
-  }, [escuchando]);
+  }, [escuchando, hayClaseElegida]);
 
   const textoActual = SUBTITULOS_EN_VIVO[indiceSubtitulo];
+
+  // Hora actual en formato 10:32
+  const horaActual = () => {
+    const d = new Date();
+    return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+  };
+  // Quita los puntos suspensivos y pone mayúscula: "…mañana hay" -> "Mañana hay"
+  const limpiar = (t) => {
+    const sin = t.replace(/^…/, '').trim();
+    return sin.charAt(0).toUpperCase() + sin.slice(1);
+  };
+
+  // Cada vez que una frase se completa, se agrega a la transcripción de la sesión
+  useEffect(() => {
+    if (indiceSubtitulo === SUBTITULOS_EN_VIVO.length - 1) {
+      fragmentosRef.current.push({ hora: horaActual(), texto: limpiar(textoActual), claves: ['prueba'] });
+    }
+  }, [indiceSubtitulo]);
+
+  // Si cambia la asignatura, empieza una sesión nueva
+  useEffect(() => {
+    inicioRef.current = Date.now();
+    fragmentosRef.current = [];
+    setIndiceSubtitulo(0);
+  }, [asignatura.id]);
+
+  // Guarda la clase en el estado compartido y abre el resumen de ESA clase
+  const terminarYGuardar = () => {
+    const fragmentos = fragmentosRef.current.length
+      ? fragmentosRef.current
+      : [{ hora: horaActual(), texto: limpiar(textoActual), claves: ['prueba'] }];
+    const segundos = (Date.now() - inicioRef.current) / 1000;
+    const id = guardarClase({ asignaturaId: asignatura.id, fragmentos, segundos });
+
+    // Reinicia la sesión para la próxima clase
+    inicioRef.current = Date.now();
+    fragmentosRef.current = [];
+    setIndiceSubtitulo(0);
+    setModalVisible(false);
+    setEscuchando(true);
+    // Se borra la asignatura elegida: la próxima vez la pestaña vuelve a preguntar
+    router.setParams({ asignaturaId: undefined });
+    router.push({ pathname: '/resumen', params: { claseId: id } });
+  };
 
   const renderizarSubtitulo = (texto) => {
     const partes = texto.split(/(prueba)/i);
@@ -51,6 +109,33 @@ export default function TraducirScreen() {
     setIndiceVelocidad((prev) => (prev + 1) % VELOCIDADES.length);
   };
 
+  // Pantalla de selección: aparece si se entra a la pestaña sin elegir una clase
+  if (!hayClaseElegida) {
+    return (
+      <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
+        <View style={styles.contenedor}>
+          <Text style={styles.tituloSeleccion}>¿Qué clase vas a traducir?</Text>
+          <Text style={styles.textoSeleccion}>
+            Elige la asignatura para guardar la transcripción en su historial.
+          </Text>
+          <FlatList
+            data={ASIGNATURAS}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.listaSeleccion}
+            renderItem={({ item }) => (
+              <Tarjeta
+                titulo={item.nombre}
+                detalle={`Sala ${item.sala} · ${item.horario}`}
+                Icono={BookOpen}
+                onPress={() => router.setParams({ asignaturaId: item.id })}
+              />
+            )}
+          />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
       <View style={styles.contenedor}>
@@ -60,7 +145,7 @@ export default function TraducirScreen() {
           contentContainerStyle={styles.contenidoScroll}
           showsVerticalScrollIndicator={false}
         >
-        <Text style={styles.titulo}>Tecnologías Web y Móviles</Text>
+        <Text style={styles.titulo}>{asignatura.nombre}</Text>
 
         <View style={styles.filaEstado}>
           <Chip
@@ -139,13 +224,10 @@ export default function TraducirScreen() {
         <VentanaConfirmacion
           visible={modalVisible}
           titulo="¿Terminar la clase?"
-          mensaje="Guardaremos la transcripción en Tecnologías Web y Móviles."
+          mensaje={`Guardaremos la transcripción en ${asignatura.nombre}.`}
           textoConfirmar="Sí, terminar y guardar"
           textoCancelar="Seguir traduciendo"
-          onConfirmar={() => {
-            setModalVisible(false);
-            router.push('/resumen');
-          }}
+          onConfirmar={terminarYGuardar}
           onCancelar={() => {
             setModalVisible(false);
             setEscuchando(true);
@@ -166,6 +248,9 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   titulo: { ...TIPOGRAFIA.subtitulo, color: COLORES.tinta },
+  tituloSeleccion: { ...TIPOGRAFIA.tituloPantalla, color: COLORES.tinta },
+  textoSeleccion: { ...TIPOGRAFIA.cuerpo, color: COLORES.tintaSuave },
+  listaSeleccion: { gap: 12, paddingVertical: 8 },
   filaEstado: { alignItems: 'flex-start' },
   filaControles: { flexDirection: 'row', gap: 10 },
   rotulo: { ...TIPOGRAFIA.etiqueta, color: COLORES.tintaSuave },

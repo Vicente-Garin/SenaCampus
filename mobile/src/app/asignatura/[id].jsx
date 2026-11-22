@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -6,7 +6,8 @@ import { Clock, Hand, Inbox } from 'lucide-react-native';
 import { COLORES } from '../../constants/colores';
 import { TIPOGRAFIA } from '../../constants/tipografia';
 import { MEDIDAS } from '../../constants/medidas';
-import { ASIGNATURAS, CLASES_POR_ASIGNATURA } from '../../data/mockData';
+import { ASIGNATURAS } from '../../data/mockData';
+import { useClases } from '../../context/ClasesContext';
 import { BarraSuperior } from '../../components/BarraSuperior';
 import { Tarjeta } from '../../components/Tarjeta';
 import { Boton } from '../../components/Boton';
@@ -16,7 +17,9 @@ export default function DetalleAsignaturaScreen() {
   const router = useRouter();
 
   const asignatura = ASIGNATURAS.find((a) => a.id === id) || ASIGNATURAS[0];
-  const clases = CLASES_POR_ASIGNATURA[asignatura.id] || [];
+  // Historial desde el estado compartido: incluye las clases recién guardadas
+  const { clasesPorAsignatura } = useClases();
+  const clases = clasesPorAsignatura[asignatura.id] || [];
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'bottom', 'left', 'right']}>
@@ -43,7 +46,9 @@ export default function DetalleAsignaturaScreen() {
             <Boton
               etiqueta="Ir a traducir ahora"
               tipo="secundario"
-              onPress={() => router.push('/(tabs)/traducir')}
+              onPress={() =>
+                router.push({ pathname: '/(tabs)/traducir', params: { asignaturaId: asignatura.id } })
+              }
             />
           </View>
         ) : (
@@ -68,7 +73,9 @@ export default function DetalleAsignaturaScreen() {
             etiqueta="Traducir esta clase"
             tipo="primario"
             Icono={Hand}
-            onPress={() => router.push('/(tabs)/traducir')}
+            onPress={() =>
+                router.push({ pathname: '/(tabs)/traducir', params: { asignaturaId: asignatura.id } })
+              }
           />
         </View>
       </View>
