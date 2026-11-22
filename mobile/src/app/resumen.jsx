@@ -1,3 +1,8 @@
+/**
+ * PANTALLA 9 · RESUMEN DE SESIÓN · ruta "/resumen?claseId=..."
+ * - Recibe el id de la clase recién guardada como parámetro.
+ * - Datos: la clase desde el Context (buscarClase).
+ */
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';

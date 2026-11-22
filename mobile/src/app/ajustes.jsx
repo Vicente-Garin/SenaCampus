@@ -1,3 +1,8 @@
+/**
+ * PANTALLA 11 · AJUSTES · ruta "/ajustes" (se abre desde Asignaturas)
+ * - Estado local de cada interruptor y de la velocidad (useState).
+ * - Cerrar sesión -> router.replace('/') vuelve al Acceso.
+ */
 import React, { useState } from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';

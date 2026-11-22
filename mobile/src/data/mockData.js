@@ -1,6 +1,7 @@
 // Datos realistas de ejemplo en español de Chile para SeñaCampus
 
 // Usuario con sesión iniciada (se muestra en el saludo de Asignaturas y en el Acceso)
+// CAMBIO EN VIVO: USUARIO.nombre es el nombre que aparece en «Hola, …» de Asignaturas.
 export const USUARIO = {
   nombre: 'Vicente',
   apellido: 'Garín',

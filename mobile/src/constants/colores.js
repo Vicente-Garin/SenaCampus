@@ -1,4 +1,5 @@
-﻿// Paleta oficial de SeñaCampus sincronizada 1:1 con Figma (contraste WCAG AA)
+// CAMBIO EN VIVO: cambiar un valor aquí lo cambia en TODA la app (ej. coral = botones principales).
+// Paleta oficial de SeñaCampus sincronizada 1:1 con Figma (contraste WCAG AA)
 export const COLORES = {
   coral: '#D14426',          // Botón primario y acción principal (4,60:1 con blanco)
   coralTexto: '#B83A1E',     // Botón primario presionado, texto coral pequeño, autor voz

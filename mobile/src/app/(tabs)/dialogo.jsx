@@ -1,4 +1,10 @@
-﻿import React, { useState, useRef } from 'react';
+/**
+ * PANTALLA 10 · MODO DIÁLOGO · ruta "/(tabs)/dialogo"
+ * - Para conversar fuera de clase: la otra persona habla (voz) y el usuario escribe.
+ * - Estado: lista de mensajes + texto del campo (TextInput controlado).
+ * - Interacción: enviar agrega una burbuja; el botón se desactiva si el campo está vacío.
+ */
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -19,7 +25,9 @@ import { VisorSenas } from '../../components/VisorSenas';
 import { Burbuja } from '../../components/Burbuja';
 
 export default function DialogoScreen() {
+  // Estado: lista de mensajes. Al cambiarla, React vuelve a dibujar la FlatList.
   const [mensajes, setMensajes] = useState(MENSAJES_DIALOGO_INICIALES);
+  // TextInput controlado: el texto del campo vive en este estado.
   const [texto, setTexto] = useState('');
   const [enfocado, setEnfocado] = useState(false);
   const listaRef = useRef(null);
@@ -35,6 +43,7 @@ export default function DialogoScreen() {
       autor: 'Tú',
       mensaje: textoLimpio,
     };
+    // Se crea un arreglo NUEVO (no se modifica el anterior) para que React detecte el cambio.
     setMensajes((prev) => [...prev, nuevo]);
     setTexto('');
     setTimeout(() => listaRef.current?.scrollToEnd({ animated: true }), 100);
@@ -42,6 +51,7 @@ export default function DialogoScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
+      {/* Evita que el teclado tape el campo de texto. */}
       <KeyboardAvoidingView
         style={styles.flexUno}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -80,6 +90,7 @@ export default function DialogoScreen() {
               accessibilityRole="button"
               accessibilityLabel="Enviar mensaje"
               accessibilityState={{ disabled: !puedeEnviar }}
+              // Prevención de errores: no se puede enviar un mensaje vacío.
               disabled={!puedeEnviar}
               onPress={enviarMensaje}
               style={[styles.botonEnviar, !puedeEnviar && styles.botonDeshabilitado]}

@@ -1,4 +1,9 @@
-﻿import React, { useEffect, useRef } from 'react';
+/**
+ * COMPONENTE · Visor de señas (UI Kit)
+ * - Estados: 'senando', 'deletreo', 'cargando', 'sinSenal'.
+ * - En este avance es una ilustración animada (Animated); luego mostrará los GIF del diccionario LSCh.
+ */
+import React, { useEffect, useRef } from 'react';
 import { View, Text, ActivityIndicator, Animated, StyleSheet } from 'react-native';
 import { WifiOff } from 'lucide-react-native';
 import { COLORES } from '../constants/colores';
@@ -13,6 +18,7 @@ export function VisorSenas({ estado = 'senando', senaActual = 'PRUEBA', alto = 2
     if (estado !== 'senando' && estado !== 'deletreo') return;
     const animacion = Animated.loop(
       Animated.sequence([
+        // useNativeDriver: la animación corre en el hilo nativo (más fluida).
         Animated.timing(pulsoManos, { toValue: -8, duration: 700, useNativeDriver: true }),
         Animated.timing(pulsoManos, { toValue: 0, duration: 700, useNativeDriver: true }),
       ])

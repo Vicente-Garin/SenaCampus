@@ -1,4 +1,9 @@
-﻿import React from 'react';
+/**
+ * COMPONENTE · Aviso (UI Kit)
+ * - Props: tipo ('error' | 'exito' | 'advertencia' | 'info') y mensaje.
+ * - Muestra el estado del sistema con color + ícono + texto (heurística de Nielsen).
+ */
+import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { AlertCircle, Check, Info } from 'lucide-react-native';
 import { COLORES } from '../constants/colores';

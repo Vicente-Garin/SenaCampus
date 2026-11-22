@@ -1,7 +1,13 @@
+/**
+ * PANTALLA 5 · ASIGNATURAS (inicio) · ruta "/(tabs)"
+ * - Datos: asignaturas y clases desde el Context (useClases); nombre desde USUARIO.
+ * - Interacción: tocar una tarjeta -> router.push a /asignatura/[id];
+ *   "+ Agregar" -> <Link> a /nueva-asignatura; ajustes -> /ajustes.
+ */
 import React from 'react';
 import { View, Text, FlatList, Pressable, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useRouter, Link } from 'expo-router';
 import { BookOpen, Hand, SlidersHorizontal, Plus } from 'lucide-react-native';
 import { COLORES } from '../../constants/colores';
 import { TIPOGRAFIA } from '../../constants/tipografia';
@@ -26,6 +32,7 @@ export default function AsignaturasScreen() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Ajustes"
+            // router.push: navega por código y apila la pantalla de Ajustes.
             onPress={() => router.push('/ajustes')}
             hitSlop={4}
             style={({ pressed }) => [
@@ -48,17 +55,21 @@ export default function AsignaturasScreen() {
         {/* Rótulo de la lista + acción ocasional "Agregar" junto a la lista que modifica */}
         <View style={styles.filaRotulo}>
           <Text style={styles.rotulo}>TUS ASIGNATURAS</Text>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Agregar asignatura"
-            onPress={() => router.push('/nueva-asignatura')}
-            style={({ pressed }) => [styles.botonAgregar, pressed && { backgroundColor: COLORES.azulSuave }]}
-          >
-            <Plus size={20} strokeWidth={2} color={COLORES.azul} />
-            <Text style={styles.textoAgregar}>Agregar</Text>
-          </Pressable>
+          {/* <Link>: navegación declarativa (como un enlace). asChild hace que el Pressable sea el enlace.
+              La otra forma es router.push(...) por código, como en las tarjetas. */}
+          <Link href="/nueva-asignatura" asChild>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Agregar asignatura"
+              style={({ pressed }) => [styles.botonAgregar, pressed && { backgroundColor: COLORES.azulSuave }]}
+            >
+              <Plus size={20} strokeWidth={2} color={COLORES.azul} />
+              <Text style={styles.textoAgregar}>Agregar</Text>
+            </Pressable>
+          </Link>
         </View>
 
+        {/* FlatList: lista que puede crecer; solo dibuja lo visible (mejor que ScrollView + .map). */}
         <FlatList
           data={asignaturas}
           keyExtractor={(item) => item.id}
@@ -92,12 +103,14 @@ export default function AsignaturasScreen() {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: COLORES.crema },
+  // Flexbox: flex: 1 ocupa todo el alto; los hijos van en columna (dirección por defecto).
   contenedor: {
     flex: 1,
     paddingHorizontal: MEDIDAS.margenPantalla,
     paddingTop: 12,
     paddingBottom: 14,
   },
+  // Fila: título a la izquierda y botón a la derecha (space-between).
   encabezado: {
     flexDirection: 'row',
     alignItems: 'center',

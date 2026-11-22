@@ -1,3 +1,10 @@
+/**
+ * PANTALLA 8 · TRADUCCIÓN EN CLASE (+ 18 · elegir clase) · ruta "/(tabs)/traducir"
+ * - Si no llega asignaturaId, primero pregunta qué clase traducir (pantalla 18).
+ * - Estado: escuchando, velocidad, subtítulo y seña actual (useState).
+ * - useEffect + setInterval simulan la voz del profesor cada 1,5 s.
+ * - Terminar -> confirmación -> guardarClase() en el Context -> /resumen.
+ */
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { View, Text, ScrollView, FlatList, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';

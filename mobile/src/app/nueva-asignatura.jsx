@@ -1,3 +1,9 @@
+/**
+ * PANTALLA 17 · NUEVA ASIGNATURA · ruta "/nueva-asignatura"
+ * - Formulario con 4 TextInput controlados (componente CampoTexto).
+ * - Validación: el nombre es obligatorio (prevención de errores).
+ * - Guardar -> agregarAsignatura() en el Context -> abre su detalle.
+ */
 import React, { useState } from 'react';
 import { View, Text, ScrollView, KeyboardAvoidingView, Platform, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';

@@ -46,6 +46,7 @@ function Boton({ etiqueta, tipo = 'primario', Icono, deshabilitado = false, carg
       accessibilityLabel={etiqueta}
       accessibilityState={{ disabled: inactivo, busy: cargando }}
       // Pressable entrega "pressed" para cambiar el estilo mientras se presiona
+      // Pressable entrega 'pressed' (true mientras el dedo está encima) para mostrar el estado presionado.
       style={({ pressed }) => {
         const c = deshabilitado ? paleta.deshabilitado : pressed ? paleta.presionado : paleta.normal;
         return [

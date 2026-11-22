@@ -1,3 +1,9 @@
+/**
+ * COMPONENTE · Ventana de confirmación (UI Kit)
+ // Modal transparente: se dibuja encima de la pantalla actual.
+ * - Usa <Modal> de React Native con fondo oscuro (velo).
+ * - Prevención de errores: se pide confirmar antes de terminar una clase.
+ */
 import React from 'react';
 import { Modal, View, Text, StyleSheet } from 'react-native';
 import { COLORES } from '../constants/colores';

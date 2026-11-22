@@ -1,4 +1,8 @@
-﻿import React from 'react';
+/**
+ * COMPONENTE · Burbuja de diálogo (UI Kit)
+ * - Props: autor, mensaje y lado ('otra' a la izquierda en blanco, 'yo' a la derecha en azul).
+ */
+import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { COLORES } from '../constants/colores';
 import { TIPOGRAFIA } from '../constants/tipografia';

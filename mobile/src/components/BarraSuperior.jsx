@@ -1,4 +1,9 @@
-﻿import React from 'react';
+/**
+ * COMPONENTE · Barra superior (UI Kit)
+ * - Botón "Volver" de 44 pt: router.back() saca la pantalla actual de la pila.
+ * - Props: textoVolver y accion opcional { Icono, etiqueta, onPress }.
+ */
+import React from 'react';
 import { View, Pressable, Text, StyleSheet } from 'react-native';
 import { ChevronLeft } from 'lucide-react-native';
 import { useRouter } from 'expo-router';

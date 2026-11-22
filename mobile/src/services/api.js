@@ -1,3 +1,8 @@
+/**
+ * CLIENTE HTTP DEL BACKEND (siguiente avance)
+ * - POST /api/v1/traductor/parse: envía el texto y recibe glosas o letras.
+ * - En el Avance 1 la app usa datos de ejemplo, así que este archivo aún no se usa.
+ */
 import { Platform } from 'react-native';
 
 const LOCAL_IP = '192.168.20.185';

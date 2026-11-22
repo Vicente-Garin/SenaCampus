@@ -1,4 +1,10 @@
-﻿import React from 'react';
+/**
+ * LAYOUT DE PESTAÑAS · grupo (tabs)
+ * - Los paréntesis forman un "grupo": (tabs) no aparece en la ruta.
+ * - Cada <Tabs.Screen name="..."> es un archivo de esta carpeta:
+ *   index = Asignaturas · traducir = Traducir · dialogo = Diálogo.
+ */
+import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Tabs } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -7,6 +13,7 @@ import { COLORES } from '../../constants/colores';
 import { TIPOGRAFIA } from '../../constants/tipografia';
 import { MEDIDAS } from '../../constants/medidas';
 
+// Cápsula azul detrás del ícono de la pestaña activa (focused), igual que en el Figma.
 function IconoPestana({ Icono, focused, color }) {
   return (
     <View style={[styles.capsula, focused && styles.capsulaActiva]}>
@@ -19,6 +26,7 @@ export default function TabsLayout() {
   const insets = useSafeAreaInsets();
 
   return (
+    // Tabs = barra de pestañas inferior (patrón móvil, al alcance del pulgar).
     <Tabs
       screenOptions={{
         headerShown: false,
@@ -32,6 +40,7 @@ export default function TabsLayout() {
           backgroundColor: COLORES.blanco,
           borderTopWidth: 1,
           borderTopColor: COLORES.borde,
+          // Se suma insets.bottom para no quedar bajo la barra de gestos (zona segura).
           height: MEDIDAS.altos.barraPestanas + insets.bottom,
           paddingTop: 6,
           paddingBottom: Math.max(insets.bottom, 8),

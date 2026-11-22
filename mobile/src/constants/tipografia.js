@@ -1,4 +1,5 @@
-﻿// Escala tipográfica Nunito (el cuerpo de texto nunca baja de 16 pt por accesibilidad)
+// Cada pantalla usa estos estilos con ...TIPOGRAFIA.cuerpo, etc. Cambiar un tamaño aquí lo cambia en toda la app.
+// Escala tipográfica Nunito (el cuerpo de texto nunca baja de 16 pt por accesibilidad)
 export const TIPOGRAFIA = {
   tituloGrande: {
     fontFamily: 'Nunito_800ExtraBold',

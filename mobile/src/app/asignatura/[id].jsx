@@ -1,3 +1,9 @@
+/**
+ * PANTALLA 6 · DETALLE DE ASIGNATURA · ruta dinámica "/asignatura/[id]"
+ * - Recibe el id con useLocalSearchParams (ej. /asignatura/twm -> id = 'twm').
+ * - Datos: la asignatura y su historial desde el Context.
+ * - Interacción: abrir una clase (/clase/[id]) o "Traducir esta clase" con el id como parámetro.
+ */
 import React from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -12,6 +18,7 @@ import { Tarjeta } from '../../components/Tarjeta';
 import { Boton } from '../../components/Boton';
 
 export default function DetalleAsignaturaScreen() {
+  // El nombre del archivo [id] crea una ruta dinámica; aquí se lee ese parámetro.
   const { id } = useLocalSearchParams();
   const router = useRouter();
 

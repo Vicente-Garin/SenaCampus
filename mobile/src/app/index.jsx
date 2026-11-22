@@ -1,3 +1,9 @@
+/**
+ * PANTALLA 3 · ACCESO · ruta "/"
+ * - Primera pantalla de la app.
+ * - Datos: el correo inicial viene de USUARIO (src/data/mockData.js).
+ * - Interacción: TextInput controlado + validación del dominio @alumnos.ulagos.cl.
+ */
 import React, { useState } from 'react';
 import { View, Text, TextInput, KeyboardAvoidingView, Platform, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -28,6 +34,7 @@ export default function AccesoScreen() {
       return;
     }
     setError('');
+    // replace (no push): el Acceso no queda en la pila, así «Volver» no regresa al login.
     router.replace('/(tabs)');
   };
 

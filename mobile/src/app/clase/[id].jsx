@@ -1,3 +1,9 @@
+/**
+ * PANTALLA 7 · TRANSCRIPCIÓN GUARDADA · ruta dinámica "/clase/[id]"
+ * - Solo lectura: no se puede volver a grabar aquí (decisión de UX).
+ * - Datos: la clase y su transcripción desde el Context.
+ * - Interacción: copiar texto (muestra un aviso 2 s con useState + setTimeout).
+ */
 import React, { useState } from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -28,6 +34,7 @@ function resaltarClaves(texto, claves = []) {
 }
 
 export default function TranscripcionGuardadaScreen() {
+  // Ruta dinámica: el id de la clase llega en la URL /clase/[id].
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const [copiado, setCopiado] = useState(false);

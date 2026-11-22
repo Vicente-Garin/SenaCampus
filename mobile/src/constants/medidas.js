@@ -1,4 +1,5 @@
-﻿// Tokens espaciales y de ergonomía móvil (todas las áreas tocables >= 44 pt)
+// Medidas comunes: margen 20, radios y altos táctiles (44 pt o más) iguales al Figma.
+// Tokens espaciales y de ergonomía móvil (todas las áreas tocables >= 44 pt)
 export const MEDIDAS = {
   margenPantalla: 20,
   espacioBloque: 14,

@@ -1,3 +1,10 @@
+/**
+ * LAYOUT RAÍZ (envuelve a toda la app)
+ * - Carga la fuente Nunito antes de mostrar la app (useFonts + SplashScreen).
+ * - SafeAreaProvider: permite respetar el notch y la barra de gestos.
+ * - ClasesProvider: estado compartido de asignaturas y clases (src/context).
+ * - Stack: navegación en pila; las pantallas nuevas se apilan encima.
+ */
 import React, { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -32,6 +39,7 @@ export default function RootLayout() {
     <SafeAreaProvider>
       {/* ClasesProvider comparte las clases guardadas con todas las pantallas */}
       <ClasesProvider>
+        {/* Stack = pila: cada pantalla nueva se apila encima y «Volver» la saca. */}
         <Stack screenOptions={{ headerShown: false }} />
       </ClasesProvider>
     </SafeAreaProvider>
