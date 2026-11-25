@@ -152,4 +152,6 @@ vite.config.ts.timestamp-*
 **/.env
 **/.env.*
 .expo/
-**/dist/
+**/dist/# Las plantillas sin valores sí se suben
+!.env.example
+!**/.env.example
