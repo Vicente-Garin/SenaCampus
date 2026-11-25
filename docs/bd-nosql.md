@@ -248,7 +248,10 @@ En las consultas de escritura, el filtro incluye `usuarioId` para que un estudia
 ![Agregación $unwind + $group: términos más deletreados](img/bd/11b-agregacion-deletreados.png)
 ![Agregación $unwind + $group: términos más deletreados (continuación)](img/bd/11c-agregacion-deletreados-fin.png)
 ![P7 y P4: eliminar clase y asignatura en cascada](img/bd/11d-consulta-eliminar.png)
-![Colecciones en MongoDB Compass](img/bd/16-compass-colecciones.png)
+**Consola de MongoDB (mongosh en el contenedor Docker):** las 4 colecciones con su cantidad de documentos y una clase con `fecha` de tipo `ISODate` y sus fragmentos embebidos.
+
+![Consola mongosh: colecciones y conteo de documentos](img/bd/16a-consola-colecciones.png)
+![Consola mongosh: documento de clases con fragmentos embebidos](img/bd/16b-consola-documento-clase.png)
 
 ---
 
