@@ -1,0 +1,19 @@
+{
+  "name": "senacampus-database",
+  "version": "1.0.0",
+  "description": "Esquemas, datos de prueba, consultas e índices de la base NoSQL (MongoDB) de SeñaCampus",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "schema": "node schema/crear-colecciones.js",
+    "schema:prueba": "node schema/prueba-validacion.js",
+    "seed": "node seed/seed.js",
+    "indices": "node queries/indices.js",
+    "consultas": "node queries/consultas.js",
+    "todo": "npm run schema && npm run seed && npm run indices && npm run consultas"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "mongodb": "^6.10.0"
+  }
+}
