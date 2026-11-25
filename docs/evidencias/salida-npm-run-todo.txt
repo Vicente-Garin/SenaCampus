@@ -1,0 +1,656 @@
+
+======================================================================
+Creando colecciones con validación en la base "senacampus_db"
+======================================================================
+- usuarios: ya existía, validador actualizado
+- asignaturas: ya existía, validador actualizado
+- clases: ya existía, validador actualizado
+- glosas: ya existía, validador actualizado
+
+======================================================================
+Cargando datos de prueba en "senacampus_db"
+======================================================================
+- glosas        2098 documentos  (nuevos: 0, reemplazados: 2098)
+- usuarios        11 documentos  (nuevos: 0, reemplazados: 11)
+- asignaturas     16 documentos  (nuevos: 0, reemplazados: 16)
+- clases          32 documentos  (nuevos: 0, reemplazados: 32)
+
+======================================================================
+Total de documentos por colección después del seed
+======================================================================
+- usuarios     11
+- asignaturas  16
+- clases       32
+- glosas       2098
+
+======================================================================
+Índice "correo_unico" en usuarios {"correo":1} (único)
+======================================================================
+Por qué: Pantalla Acceso: buscar el perfil por correo. Además impide dos cuentas con el mismo correo.
+┌─────────┬────────────────────────────────┬───────────────┬─────────────────┬───────────┬────┐
+│ (index) │ plan                           │ docsRevisados │ clavesRevisadas │ devueltos │ ms │
+├─────────┼────────────────────────────────┼───────────────┼─────────────────┼───────────┼────┤
+│ ANTES   │ 'COLLSCAN'                     │ 11            │ 0               │ 1         │ 0  │
+│ DESPUÉS │ 'EXPRESS_IXSCAN(correo_unico)' │ 1             │ 1               │ 1         │ 0  │
+└─────────┴────────────────────────────────┴───────────────┴─────────────────┴───────────┴────┘
+
+======================================================================
+Índice "firebaseUid_unico" en usuarios {"firebaseUid":1} (único)
+======================================================================
+Por qué: Acceso con Firebase Auth (Avance N°2): buscar el perfil por el UID que entrega Firebase.
+┌─────────┬─────────────────────────────────────┬───────────────┬─────────────────┬───────────┬────┐
+│ (index) │ plan                                │ docsRevisados │ clavesRevisadas │ devueltos │ ms │
+├─────────┼─────────────────────────────────────┼───────────────┼─────────────────┼───────────┼────┤
+│ ANTES   │ 'COLLSCAN'                          │ 11            │ 0               │ 1         │ 0  │
+│ DESPUÉS │ 'EXPRESS_IXSCAN(firebaseUid_unico)' │ 1             │ 1               │ 1         │ 0  │
+└─────────┴─────────────────────────────────────┴───────────────┴─────────────────┴───────────┴────┘
+
+======================================================================
+Índice "usuario_nombre" en asignaturas {"usuarioId":1,"nombre":1}
+======================================================================
+Por qué: Pantalla Asignaturas: filtra por usuario y ordena por nombre sin ordenar en memoria.
+┌─────────┬──────────────────────────────────┬───────────────┬─────────────────┬───────────┬────┐
+│ (index) │ plan                             │ docsRevisados │ clavesRevisadas │ devueltos │ ms │
+├─────────┼──────────────────────────────────┼───────────────┼─────────────────┼───────────┼────┤
+│ ANTES   │ 'SORT → COLLSCAN'                │ 16            │ 0               │ 4         │ 0  │
+│ DESPUÉS │ 'FETCH → IXSCAN(usuario_nombre)' │ 4             │ 4               │ 4         │ 0  │
+└─────────┴──────────────────────────────────┴───────────────┴─────────────────┴───────────┴────┘
+
+======================================================================
+Índice "asignatura_fecha" en clases {"asignaturaId":1,"fecha":-1}
+======================================================================
+Por qué: Detalle de asignatura: historial de una asignatura de la clase más nueva a la más antigua. También acelera el $lookup de Asignaturas.
+┌─────────┬────────────────────────────────────┬───────────────┬─────────────────┬───────────┬────┐
+│ (index) │ plan                               │ docsRevisados │ clavesRevisadas │ devueltos │ ms │
+├─────────┼────────────────────────────────────┼───────────────┼─────────────────┼───────────┼────┤
+│ ANTES   │ 'SORT → COLLSCAN'                  │ 32            │ 0               │ 6         │ 0  │
+│ DESPUÉS │ 'FETCH → IXSCAN(asignatura_fecha)' │ 6             │ 6               │ 6         │ 0  │
+└─────────┴────────────────────────────────────┴───────────────┴─────────────────┴───────────┴────┘
+
+======================================================================
+Índice "usuario_fecha" en clases {"usuarioId":1,"fecha":-1}
+======================================================================
+Por qué: Agregaciones de estadísticas y términos deletreados: el $match por usuario usa este índice.
+┌─────────┬─────────────────────────────────┬───────────────┬─────────────────┬───────────┬────┐
+│ (index) │ plan                            │ docsRevisados │ clavesRevisadas │ devueltos │ ms │
+├─────────┼─────────────────────────────────┼───────────────┼─────────────────┼───────────┼────┤
+│ ANTES   │ 'SORT → COLLSCAN'               │ 32            │ 0               │ 16        │ 0  │
+│ DESPUÉS │ 'FETCH → IXSCAN(usuario_fecha)' │ 16            │ 16              │ 16        │ 0  │
+└─────────┴─────────────────────────────────┴───────────────┴─────────────────┴───────────┴────┘
+
+======================================================================
+Índice "termino_1" en glosas {"termino":1}
+======================================================================
+Por qué: Pantalla Traducir: buscar cada palabra en el diccionario de 2.098 términos.
+┌─────────┬─────────────────────────────┬───────────────┬─────────────────┬───────────┬────┐
+│ (index) │ plan                        │ docsRevisados │ clavesRevisadas │ devueltos │ ms │
+├─────────┼─────────────────────────────┼───────────────┼─────────────────┼───────────┼────┤
+│ ANTES   │ 'COLLSCAN'                  │ 2098          │ 0               │ 4         │ 0  │
+│ DESPUÉS │ 'FETCH → IXSCAN(termino_1)' │ 4             │ 10              │ 4         │ 0  │
+└─────────┴─────────────────────────────┴───────────────┴─────────────────┴───────────┴────┘
+
+======================================================================
+Índice "variantes_1" en glosas {"variantes":1}
+======================================================================
+Por qué: Pantalla Traducir: sinónimos ("estudiante" → GL_ALUMNO). Con el índice "termino_1", el $or usa los dos.
+┌─────────┬──────────────────────────────────────────────────────────────────┬───────────────┬─────────────────┬───────────┬────┐
+│ (index) │ plan                                                             │ docsRevisados │ clavesRevisadas │ devueltos │ ms │
+├─────────┼──────────────────────────────────────────────────────────────────┼───────────────┼─────────────────┼───────────┼────┤
+│ ANTES   │ 'SUBPLAN → COLLSCAN'                                             │ 2098          │ 0               │ 4         │ 1  │
+│ DESPUÉS │ 'SUBPLAN → FETCH → OR → IXSCAN(termino_1) → IXSCAN(variantes_1)' │ 4             │ 16              │ 4         │ 0  │
+└─────────┴──────────────────────────────────────────────────────────────────┴───────────────┴─────────────────┴───────────┴────┘
+
+======================================================================
+Índice "glosa_id_1" en glosas {"glosa_id":1} (único)
+======================================================================
+Por qué: Seed idempotente y reproductor de señas: buscar una glosa por su código; no permite códigos repetidos.
+┌─────────┬──────────────────────────────┬───────────────┬─────────────────┬───────────┬────┐
+│ (index) │ plan                         │ docsRevisados │ clavesRevisadas │ devueltos │ ms │
+├─────────┼──────────────────────────────┼───────────────┼─────────────────┼───────────┼────┤
+│ ANTES   │ 'COLLSCAN'                   │ 2098          │ 0               │ 1         │ 0  │
+│ DESPUÉS │ 'EXPRESS_IXSCAN(glosa_id_1)' │ 1             │ 1               │ 1         │ 0  │
+└─────────┴──────────────────────────────┴───────────────┴─────────────────┴───────────┴────┘
+
+======================================================================
+Índices finales por colección
+======================================================================
+- usuarios: _id_, correo_unico (único), firebaseUid_unico (único)
+- asignaturas: _id_, usuario_nombre
+- clases: _id_, asignatura_fecha, usuario_fecha
+- glosas: _id_, termino_1, variantes_1, glosa_id_1 (único)
+
+======================================================================
+P1 · Acceso — R: buscar usuario por correo institucional
+======================================================================
+{
+  "_id": "1820d6eb8b0a39434c36f463",
+  "firebaseUid": "lfNoB1Nj7BL0qh47wpxWhG5qHzOB",
+  "nombre": "Vicente",
+  "apellido": "Garín",
+  "correo": "vicente.garin@alumnos.ulagos.cl",
+  "ajustes": {
+    "textoGrande": false,
+    "subtitulos": true,
+    "vibracion": true,
+    "velocidadSenas": 1
+  }
+}
+
+======================================================================
+P1 · Acceso — U: registrar último acceso
+======================================================================
+{
+  "acknowledged": true,
+  "modifiedCount": 1,
+  "upsertedId": null,
+  "upsertedCount": 0,
+  "matchedCount": 1
+}
+
+======================================================================
+P2 · Asignaturas — R + $lookup: asignaturas con contador de clases (orden por nombre)
+======================================================================
+[
+  {
+    "_id": "df64b31185b3ab06a196ebb8",
+    "nombre": "Bases de Datos II",
+    "sala": "A-110",
+    "profesor": "Prof. Paula Vera",
+    "horario": {
+      "dias": [
+        "martes"
+      ],
+      "inicio": "08:30",
+      "fin": "09:50"
+    },
+    "color": "#D6E4F5",
+    "clasesGuardadas": 4,
+    "ultimaClase": "2026-11-17T11:30:00.000Z"
+  },
+  {
+    "_id": "46f146bb73156886cc550e80",
+    "nombre": "Ingeniería de Software",
+    "sala": "C-302",
+    "profesor": "Prof. Rodrigo Soto",
+    "horario": {
+      "dias": [
+        "jueves"
+      ],
+      "inicio": "14:30",
+      "fin": "15:50"
+    },
+    "color": "#DCEFD8",
+    "clasesGuardadas": 5,
+    "ultimaClase": "2026-11-19T17:30:00.000Z"
+  },
+  {
+    "_id": "fc61d35db3e579af9b768605",
+    "nombre": "Redes de Computadores",
+    "sala": "Laboratorio 2",
+    "profesor": "Prof. Claudia Henríquez",
+    "horario": {
+      "dias": [
+        "viernes"
+      ],
+      "inicio": "10:15",
+      "fin": "11:35"
+    },
+    "color": "#F3E3C3",
+    "clasesGuardadas": 1,
+    "ultimaClase": "2026-11-20T13:15:00.000Z"
+  },
+  {
+    "_id": "1793a64172f61b997f781e9e",
+    "nombre": "Tecnologías Web y Móviles",
+    "sala": "B-204",
+    "profesor": "Prof. Andrés Morales",
+    "horario": {
+      "dias": [
+        "lunes",
+        "miercoles"
+      ],
+      "inicio": "10:15",
+      "fin": "11:35"
+    },
+    "color": "#FAD9CF",
+    "clasesGuardadas": 6,
+    "ultimaClase": "2026-11-18T13:15:00.000Z"
+  }
+]
+
+======================================================================
+P4 · Detalle de asignatura — R por id + historial ordenado por fecha (desc)
+======================================================================
+{
+  "asignatura": {
+    "_id": "1793a64172f61b997f781e9e",
+    "usuarioId": "1820d6eb8b0a39434c36f463",
+    "nombre": "Tecnologías Web y Móviles",
+    "sala": "B-204",
+    "profesor": "Prof. Andrés Morales",
+    "horario": {
+      "dias": [
+        "lunes",
+        "miercoles"
+      ],
+      "inicio": "10:15",
+      "fin": "11:35"
+    },
+    "color": "#FAD9CF",
+    "creadaEn": "2026-10-29T22:00:00.000Z"
+  },
+  "clasesEnHistorial": 6,
+  "historial": [
+    {
+      "_id": "a40786265cf13a177d5c273d",
+      "fecha": "2026-11-18T13:15:00.000Z",
+      "duracionSegundos": 4800,
+      "palabras": 43,
+      "deletreadas": [
+        "vamos",
+        "navegacion",
+        "expo",
+        "router",
+        "cada",
+        "archivo",
+        "dentro",
+        "app",
+        "convierte",
+        "pantalla",
+        "pestanas",
+        "usamos",
+        "layout",
+        "tabs",
+        "detalle",
+        "ruta",
+        "dinamica",
+        "recuerden",
+        "sobre",
+        "arquitectura",
+        "servicios"
+      ]
+    },
+    {
+      "_id": "4d5491e3252a1fe84e7e45f1",
+      "fecha": "2026-11-16T13:15:00.000Z",
+      "duracionSegundos": 4500,
+      "palabras": 36,
+      "deletreadas": [
+        "pestanas",
+        "usamos",
+        "layout",
+        "tabs",
+        "detalle",
+        "ruta",
+        "dinamica",
+        "recuerden",
+        "sobre",
+        "arquitectura",
+        "servicios",
+        "estado",
+        "compartido",
+        "entre",
+        "pantallas",
+        "resolvemos",
+        "context",
+        "hook",
+        "usecontext"
+      ]
+    },
+    {
+      "_id": "6946cfdfd3ffcc39c2035510",
+      "fecha": "2026-11-11T13:15:00.000Z",
+      "duracionSegundos": 4920,
+      "palabras": 34,
+      "deletreadas": [
+        "recuerden",
+        "sobre",
+        "arquitectura",
+        "servicios",
+        "estado",
+        "compartido",
+        "entre",
+        "pantallas",
+        "resolvemos",
+        "context",
+        "hook",
+        "usecontext",
+        "api",
+        "rest",
+        "responde",
+        "formato",
+        "json",
+        "cada",
+        "endpoint",
+        "representa",
+        "recurso"
+      ]
+    }
+  ]
+}
+
+======================================================================
+P7 · Transcripción — R por id: clase completa con fragmentos embebidos
+======================================================================
+{
+  "_id": "a40786265cf13a177d5c273d",
+  "asignaturaId": "1793a64172f61b997f781e9e",
+  "usuarioId": "1820d6eb8b0a39434c36f463",
+  "asignatura": {
+    "nombre": "Tecnologías Web y Móviles",
+    "color": "#FAD9CF"
+  },
+  "fecha": "2026-11-18T13:15:00.000Z",
+  "duracionSegundos": 4800,
+  "palabras": 43,
+  "estado": "finalizada",
+  "fragmentos": [
+    {
+      "marcaTiempo": "2026-11-18T13:35:00.000Z",
+      "texto": "Hoy vamos a ver navegación con Expo Router. Cada archivo dentro de la carpeta app se convierte en una pantalla.",
+      "claves": [
+        "Expo Router"
+      ],
+      "glosas": [
+        "GL_HOY",
+        "GL_VAMOS",
+        "GL_VER",
+        "GL_NAVEGACION",
+        "GL_EXPO",
+        "GL_ROUTER",
+        "GL_CADA",
+        "GL_ARCHIVO",
+        "GL_DENTRO",
+        "GL_CARPETA",
+        "GL_APP",
+        "GL_CONVIERTE",
+        "GL_PANTALLA"
+      ]
+    },
+    {
+      "marcaTiempo": "2026-11-18T13:55:00.000Z",
+      "texto": "Para las pestañas usamos un layout con Tabs y, para el detalle, una ruta dinámica.",
+      "claves": [
+        "pestañas",
+        "ruta dinámica"
+      ],
+      "glosas": [
+        "GL_PESTANAS",
+        "GL_USAMOS",
+        "GL_LAYOUT",
+        "GL_TABS",
+        "GL_DETALLE",
+        "GL_RUTA",
+        "GL_DINAMICA"
+      ]
+    },
+    {
+      "marcaTiempo": "2026-11-18T14:15:00.000Z",
+      "texto": "Recuerden: mañana hay prueba sobre arquitectura de servicios.",
+      "claves": [
+        "prueba"
+      ],
+      "glosas": [
+        "GL_RECUERDEN",
+        "GL_MANANA",
+        "GL_PRUEBA",
+        "GL_SOBRE",
+        "GL_ARQUITECTURA",
+        "GL_SERVICIOS"
+      ]
+    }
+  ],
+  "deletreadas": [
+    "vamos",
+    "navegacion",
+    "expo",
+    "router",
+    "cada",
+    "archivo",
+    "dentro",
+    "app",
+    "convierte",
+    "pantalla",
+    "pestanas",
+    "usamos",
+    "layout",
+    "tabs",
+    "detalle",
+    "ruta",
+    "dinamica",
+    "recuerden",
+    "sobre",
+    "arquitectura",
+    "servicios"
+  ]
+}
+
+======================================================================
+P3 · Nueva asignatura — C: insertar asignatura
+======================================================================
+{
+  "acknowledged": true,
+  "insertedId": "6b0729a49ff4ba691d2660be"
+}
+
+======================================================================
+P3 · Detalle (Editar) — U: actualizar sala de la asignatura nueva
+======================================================================
+{
+  "_id": "6b0729a49ff4ba691d2660be",
+  "usuarioId": "1820d6eb8b0a39434c36f463",
+  "nombre": "Taller de Integración",
+  "sala": "C-201",
+  "profesor": "Prof. Ximena Cárdenas",
+  "horario": {
+    "dias": [
+      "viernes"
+    ],
+    "inicio": "15:00",
+    "fin": "16:20"
+  },
+  "color": "#E8D9F2",
+  "creadaEn": "2026-11-25T18:32:04.806Z"
+}
+
+======================================================================
+P5 · Traducir — R: glosas del diccionario para una frase del docente
+======================================================================
+Frase: "Mañana hay prueba en la biblioteca, estudien la clase de hoy"
+[
+  {
+    "termino": "biblioteca",
+    "glosa_id": "GL_BIBLIOTECA",
+    "tipo_recurso": "lottie",
+    "archivo_asset": "assets/signs/common/biblioteca.json"
+  },
+  {
+    "termino": "clase",
+    "glosa_id": "GL_CLASE",
+    "tipo_recurso": "lottie",
+    "archivo_asset": "assets/signs/common/clase.json"
+  },
+  {
+    "termino": "hoy",
+    "glosa_id": "GL_HOY",
+    "tipo_recurso": "lottie",
+    "archivo_asset": "assets/signs/common/hoy.json"
+  },
+  {
+    "termino": "prueba",
+    "glosa_id": "GL_PRUEBA",
+    "tipo_recurso": "lottie",
+    "archivo_asset": "assets/signs/common/prueba.json"
+  }
+]
+
+======================================================================
+P5 · Traducir — C: "Sí, terminar y guardar" inserta la clase
+======================================================================
+{
+  "acknowledged": true,
+  "insertedId": "6b0729a49ff4ba691d2660bf"
+}
+
+======================================================================
+P6 · Resumen de sesión — R por id: datos del resumen de la clase recién guardada
+======================================================================
+{
+  "_id": "6b0729a49ff4ba691d2660bf",
+  "asignatura": {
+    "nombre": "Taller de Integración",
+    "color": "#E8D9F2"
+  },
+  "fecha": "2026-11-27T18:00:00.000Z",
+  "duracionSegundos": 4500,
+  "palabras": 16,
+  "deletreadas": [
+    "prototipo",
+    "integrado"
+  ]
+}
+
+======================================================================
+P8 · Ajustes — U: activar texto grande y velocidad 0.75x
+======================================================================
+{
+  "_id": "1820d6eb8b0a39434c36f463",
+  "nombre": "Vicente",
+  "ajustes": {
+    "textoGrande": true,
+    "subtitulos": true,
+    "vibracion": true,
+    "velocidadSenas": 0.75
+  }
+}
+
+======================================================================
+Agregación $match + $group — estadísticas por asignatura (orden por minutos)
+======================================================================
+[
+  {
+    "_id": "1793a64172f61b997f781e9e",
+    "asignatura": "Tecnologías Web y Móviles",
+    "clases": 6,
+    "minutosTraducidos": 466,
+    "palabras": 249,
+    "ultimaClase": "2026-11-18T13:15:00.000Z"
+  },
+  {
+    "_id": "46f146bb73156886cc550e80",
+    "asignatura": "Ingeniería de Software",
+    "clases": 5,
+    "minutosTraducidos": 427,
+    "palabras": 198,
+    "ultimaClase": "2026-11-19T17:30:00.000Z"
+  },
+  {
+    "_id": "df64b31185b3ab06a196ebb8",
+    "asignatura": "Bases de Datos II",
+    "clases": 4,
+    "minutosTraducidos": 322,
+    "palabras": 164,
+    "ultimaClase": "2026-11-17T11:30:00.000Z"
+  },
+  {
+    "_id": "fc61d35db3e579af9b768605",
+    "asignatura": "Redes de Computadores",
+    "clases": 1,
+    "minutosTraducidos": 77,
+    "palabras": 36,
+    "ultimaClase": "2026-11-20T13:15:00.000Z"
+  },
+  {
+    "_id": "6b0729a49ff4ba691d2660be",
+    "asignatura": "Taller de Integración",
+    "clases": 1,
+    "minutosTraducidos": 75,
+    "palabras": 16,
+    "ultimaClase": "2026-11-27T18:00:00.000Z"
+  }
+]
+
+======================================================================
+Agregación $unwind + $group — términos más deletreados (sin seña en el diccionario)
+======================================================================
+[
+  {
+    "_id": "cada",
+    "veces": 6,
+    "asignaturas": [
+      "Redes de Computadores",
+      "Tecnologías Web y Móviles"
+    ]
+  },
+  {
+    "_id": "datos",
+    "veces": 6,
+    "asignaturas": [
+      "Bases de Datos II",
+      "Tecnologías Web y Móviles"
+    ]
+  },
+  {
+    "_id": "debe",
+    "veces": 6,
+    "asignaturas": [
+      "Tecnologías Web y Móviles",
+      "Ingeniería de Software"
+    ]
+  },
+  {
+    "_id": "dentro",
+    "veces": 6,
+    "asignaturas": [
+      "Tecnologías Web y Móviles",
+      "Redes de Computadores",
+      "Bases de Datos II"
+    ]
+  },
+  {
+    "_id": "desde",
+    "veces": 6,
+    "asignaturas": [
+      "Tecnologías Web y Móviles",
+      "Ingeniería de Software"
+    ]
+  },
+  {
+    "_id": "conviene",
+    "veces": 5,
+    "asignaturas": [
+      "Ingeniería de Software",
+      "Bases de Datos II"
+    ]
+  },
+  {
+    "_id": "sistema",
+    "veces": 5,
+    "asignaturas": [
+      "Ingeniería de Software"
+    ]
+  },
+  {
+    "_id": "usuario",
+    "veces": 5,
+    "asignaturas": [
+      "Ingeniería de Software"
+    ]
+  }
+]
+
+======================================================================
+P7 · Transcripción — D: eliminar la clase de prueba
+======================================================================
+{
+  "acknowledged": true,
+  "deletedCount": 1
+}
+
+======================================================================
+P4 · Detalle — D en cascada: eliminar la asignatura de prueba y sus clases
+======================================================================
+{
+  "asignaturasEliminadas": 1,
+  "clasesEliminadas": 0
+}
