@@ -38,7 +38,9 @@ const GlossSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Índice para búsquedas rápidas por término o variantes
-GlossSchema.index({ termino: 1, variantes: 1 });
+// Índice multikey para buscar sinónimos (termino ya tiene su propio índice con index: true).
+// Mismos índices que crea database/queries/indices.js.
+GlossSchema.index({ variantes: 1 });
 
-module.exports = mongoose.model('Gloss', GlossSchema);
+// Colección 'glosas' (en español, igual que el resto del modelo de datos)
+module.exports = mongoose.model('Gloss', GlossSchema, 'glosas');
