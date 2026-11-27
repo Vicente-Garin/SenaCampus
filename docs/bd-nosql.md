@@ -360,6 +360,13 @@ Los pasos 4, 6, 7 y 8 se pueden correr juntos con `npm run todo`. Para ver los d
 | La primera versión de la demo de consultas dejó una asignatura de prueba duplicada al cortarse a medias. | El script ahora limpia los restos de una ejecución anterior antes de empezar. |
 | Los nombres de índice propuestos para `glosas` chocaban con los que crea Mongoose al iniciar el servidor. | Se usaron los nombres por defecto (`termino_1`, `glosa_id_1`). |
 | Al revisar las capturas, el `explain()` "antes" del índice `termino_1` salía con IXSCAN: Mongoose había creado un índice compuesto `{termino, variantes}` que se adelantaba a la medición. | Se reemplazó por `{variantes: 1}` en `Gloss.js` (el compuesto era redundante) y `indices.js` borra el antiguo antes de medir. Ahora el "antes" sale como COLLSCAN sobre 2.098 documentos. |
-| *(Completar con tus propias revisiones: datos que cambiaste, textos que ajustaste, etc.)* | |
+| **Decisión propia:** se evaluó usar Firebase (Firestore) y MongoDB como dos bases de datos, ya que el docente lo permitía. La IA advirtió que duplicaba el trabajo (reglas, índices y seed en ambos motores) y complicaba el modelo. | Elegí **MongoDB como única base de datos** (todo lo que exige la rúbrica) y **Firebase solo para el inicio de sesión** (Authentication), que no es una base de datos y se usará en el Avance N°2. Por eso `usuarios` guarda el `firebaseUid`. |
+
+**Evidencia de las conversaciones con la IA:**
+
+![Prompt inicial: revisar el proyecto y continuar](img/bd/17c-ia-prompt-inicial.png)
+![Prompt con la rúbrica y la corrección de la Idea 2](img/bd/17d-ia-prompt-rubrica.png)
+![Evaluación de usar Firebase y MongoDB](img/bd/17a-ia-decision-firebase-mongodb.png)
+![Decisión: MongoDB como base y Firebase solo para el login](img/bd/17b-ia-decision-opcion-a.png)
 
 Todo el código generado se ejecutó y verificó contra la base local: creación de colecciones, rechazo de inserciones inválidas, seed repetido sin duplicar, consultas y `explain()`.
