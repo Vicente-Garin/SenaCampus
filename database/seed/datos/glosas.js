@@ -322,27 +322,47 @@ const officialLSchVocab = [
   'zoologico', 'zorro'
 ];
 
+// Misma normalización que usa el traductor (minúsculas, sin tildes, ñ → n, sin signos),
+// así "mañana" en el diccionario calza con "manana" en el texto ya limpiado.
+const { normalizeText } = require('../../../server/src/utils/textParser');
+const normalizar = (texto) => normalizeText(String(texto).replace(/-/g, ' '));
+
+// Agrega a las variantes la forma normalizada de cada término (si es distinta)
+const conFormasNormalizadas = (sign) => {
+  const variantes = new Set(sign.variantes);
+  for (const t of [sign.termino, ...sign.variantes]) {
+    const n = normalizar(t);
+    if (n && n !== t) variantes.add(n);
+  }
+  return { ...sign, variantes: [...variantes] };
+};
+
 const buildCorpus = () => {
   const dictionary = new Map();
+  const usados = new Set(prioritySigns.map((s) => s.glosa_id.slice(3)));
 
   // 1. Agregar las señas prioritarias universitarias
   prioritySigns.forEach(sign => {
-    dictionary.set(sign.termino.toLowerCase(), sign);
+    dictionary.set(sign.termino.toLowerCase(), conFormasNormalizadas(sign));
   });
 
   // 2. Agregar los términos oficiales de los dos tomos LSCh
   officialLSchVocab.forEach(term => {
     const cleanTerm = term.toLowerCase().trim();
     if (!dictionary.has(cleanTerm)) {
-      const sanitizedId = cleanTerm.toUpperCase().replace(/[^A-Z0-9]/g, '_');
-      dictionary.set(cleanTerm, {
+      // El código usa la forma normalizada: "año" → GL_ANO, "viña-del-mar" → GL_VINA_DEL_MAR
+      // Si dos términos quedan iguales al normalizar (ordenar / ordeñar) se agrega un sufijo
+      let sanitizedId = normalizar(cleanTerm).toUpperCase().replace(/[^A-Z0-9]/g, '_');
+      while (usados.has(sanitizedId)) sanitizedId += '_2';
+      usados.add(sanitizedId);
+      dictionary.set(cleanTerm, conFormasNormalizadas({
         termino: cleanTerm,
         glosa_id: `GL_${sanitizedId}`,
         variantes: [cleanTerm],
         categoria: 'general',
         tipo_recurso: 'dactilologia',
         archivo_asset: null
-      });
+      }));
     }
   });
 

@@ -1,6 +1,24 @@
 const Gloss = require('../models/Gloss');
 const { cleanTokens } = require('../utils/textParser');
 
+// Busca una glosa por término o sinónimo. Si hay varias coincidencias, prefiere la que
+// tiene el término exacto (ej. "ordenar" antes que "ordeñar", que se normaliza igual).
+const buscarGlosa = async (candidatos) => {
+  const resultados = await Gloss.find({
+    $or: [{ termino: { $in: candidatos } }, { variantes: { $in: candidatos } }]
+  }).select('glosa_id termino variantes categoria tipo_recurso archivo_asset').limit(10).lean();
+  if (resultados.length === 0) return null;
+  for (const c of candidatos) {
+    const exacta = resultados.find((g) => g.termino === c);
+    if (exacta) return exacta;
+  }
+  for (const c of candidatos) {
+    const porVariante = resultados.find((g) => (g.variantes || []).includes(c));
+    if (porVariante) return porVariante;
+  }
+  return resultados[0];
+};
+
 const parseTranscriptToGlosses = async (req, res) => {
   try {
     const { texto, contexto } = req.body;
@@ -31,14 +49,7 @@ const parseTranscriptToGlosses = async (req, res) => {
         const bigram = `${tokens[i]} ${tokens[i+1]}`;
         const bigramWithDe = `${tokens[i]} de ${tokens[i+1]}`; // caso "sala de clases"
         
-        matchedGloss = await Gloss.findOne({
-          $or: [
-            { termino: bigram },
-            { variantes: bigram },
-            { termino: bigramWithDe },
-            { variantes: bigramWithDe }
-          ]
-        }).select('glosa_id termino categoria tipo_recurso archivo_asset');
+        matchedGloss = await buscarGlosa([bigram, bigramWithDe]);
 
         if (matchedGloss) {
           matchedLength = 2; // Consume ambos tokens ("sala" y "clases")
@@ -51,14 +62,7 @@ const parseTranscriptToGlosses = async (req, res) => {
         // Quitar la 's' final para lematizar plurales simples si aplica (ej. matematicas -> matematica)
         const singular = single.endsWith('s') && single.length > 3 ? single.slice(0, -1) : single;
 
-        matchedGloss = await Gloss.findOne({
-          $or: [
-            { termino: single },
-            { variantes: single },
-            { termino: singular },
-            { variantes: singular }
-          ]
-        }).select('glosa_id termino categoria tipo_recurso archivo_asset');
+        matchedGloss = await buscarGlosa([single, singular]);
       }
 
       const currentTerm = tokens.slice(i, i + matchedLength).join(' ');

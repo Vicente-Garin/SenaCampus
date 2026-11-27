@@ -57,6 +57,11 @@ const main = async () => {
       corpus.map((g) => ({ replaceOne: { filter: { glosa_id: g.glosa_id }, replacement: g, upsert: true } })),
       { ordered: false }
     );
+    // Borra glosas que ya no están en el diccionario (por ejemplo, códigos antiguos como GL_A_O → GL_ANO)
+    const { deletedCount: glosasAntiguas } = await db.collection('glosas').deleteMany({
+      glosa_id: { $nin: corpus.map((g) => g.glosa_id) },
+    });
+    if (glosasAntiguas) console.log(`- glosas antiguas eliminadas: ${glosasAntiguas}`);
 
     // 2. usuarios
     const idUsuario = {};
