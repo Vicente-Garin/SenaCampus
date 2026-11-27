@@ -13,6 +13,12 @@ Aplicación móvil desarrollada en **React Native con Expo (SDK 58)** para apoya
 * **Bitácora de diseño y frontend:** [docs/bitacora.md](./docs/bitacora.md)
 * **Diseño y prototipo en Figma:** [señaCampus en Figma](https://www.figma.com/design/bCv8y8gXMaHy6oLUagS4PI/se%C3%B1aCampus?node-id=3-362&t=3c6s7hihCM2XMi2I-1)
 
+## Entregables del Trabajo 3 — Base de Datos NoSQL (Bases de Datos Avanzadas)
+
+* **Informe del avance:** [docs/bd-nosql.md](./docs/bd-nosql.md)
+* **Scripts de la base (MongoDB):** [database/](./database) — `schema/` (validación `$jsonSchema`), `seed/` (datos de prueba) y `queries/` (consultas por pantalla, agregaciones e índices)
+* **Variables necesarias, sin valores:** [.env.example](./.env.example)
+
 ---
 
 ## Stack tecnológico

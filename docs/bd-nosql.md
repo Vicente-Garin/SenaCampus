@@ -231,6 +231,8 @@ Todas están en [`database/queries/consultas.js`](../database/queries/consultas.
 | 14 | **Transcripción** → Eliminar | Eliminar | `clases.deleteOne({ _id, usuarioId })` |
 | 15 | **Detalle de asignatura** → Eliminar | Eliminar en cascada | `clases.deleteMany({ asignaturaId })` + `asignaturas.deleteOne({ _id, usuarioId })` |
 
+**Pantalla Diálogo (`(tabs)/dialogo.jsx`):** en este avance no consulta la base. Es una conversación breve de pasillo que hoy vive solo en el teléfono y no forma parte del caso de uso principal (traducir y guardar clases). Su colección futura, `dialogos`, está descrita en la sección 2.
+
 En las consultas de escritura, el filtro incluye `usuarioId` para que un estudiante no pueda modificar ni borrar datos de otro.
 
 **Capturas del resultado** (salida de `npm run consultas`):
@@ -353,7 +355,7 @@ Los pasos 4, 6, 7 y 8 se pueden correr juntos con `npm run todo`. Para ver los d
 
 | Problema | Corrección |
 |---|---|
-| `docker-compose.yml` y `seedDictionary.js` tenían la contraseña de MongoDB escrita en el código (penalización de la rúbrica). | Las credenciales pasaron a `.env` (ignorado por Git) y se agregaron `.env.example` sin valores. |
+| `docker-compose.yml` y `seedDictionary.js` tenían la contraseña de MongoDB escrita en el código (penalización de la rúbrica). | Las credenciales pasaron a `.env` (ignorado por Git) y se agregaron `.env.example` sin valores. Además se **cambió la contraseña** de MongoDB: la que aparece en commits antiguos del historial ya no es válida. |
 | En la app (Avance N°1) la fecha de una clase era texto (`"Clase del 18 de noviembre"`) y la duración también (`"1 h 20 min"`). | En la base son `fecha: Date` y `duracionSegundos: int`. La app formateará el texto al mostrarlo. |
 | La colección del diccionario se llamaba `glosses` (nombre automático de Mongoose en inglés). | Se renombró a `glosas` en `Gloss.js`, igual que el resto del modelo. |
 | El diccionario LSCh estaba escrito dentro del script del backend. | Se movió a `database/seed/datos/glosas.js` como única fuente, usada por el seed y por el backend. |
