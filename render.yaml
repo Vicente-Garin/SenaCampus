@@ -22,3 +22,5 @@ services:
       # Producción: nunca "desarrollo". Las rutas con datos del estudiante esperan Firebase.
       - key: AUTH_MODO
         value: produccion
+      - key: FIREBASE_PROJECT_ID   # no es secreto: sirve para verificar los inicios de sesión
+        value: senacampus-f5683

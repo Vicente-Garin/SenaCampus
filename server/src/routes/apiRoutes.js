@@ -1,11 +1,16 @@
 // Rutas de la API que necesitan saber quién es el estudiante (todas pasan por autenticar)
 const express = require('express');
-const { autenticar } = require('../middlewares/autenticar');
+const { autenticar, verificarToken } = require('../middlewares/autenticar');
 const usuario = require('../controllers/usuarioController');
 const asignatura = require('../controllers/asignaturaController');
 const clase = require('../controllers/claseController');
 
 const router = express.Router();
+
+// Crear cuenta: solo exige la cuenta de Firebase (el perfil todavía no existe)
+router.post('/usuarios', verificarToken, usuario.crearPerfil);
+
+// Desde aquí todas las rutas exigen un perfil
 router.use(autenticar);
 
 // Acceso y Ajustes
