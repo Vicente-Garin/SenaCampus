@@ -3,12 +3,14 @@
  * - Carga la fuente Nunito antes de mostrar la app (useFonts + SplashScreen).
  * - SafeAreaProvider: permite respetar el notch y la barra de gestos.
  * - ClasesProvider: estado compartido de asignaturas y clases (src/context).
+ * - ConversacionesProvider: contactos y conversaciones guardadas de Diálogo.
  * - Stack: navegación en pila; las pantallas nuevas se apilan encima.
  */
 import React, { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ClasesProvider } from '../context/ClasesContext';
+import { ConversacionesProvider } from '../context/ConversacionesContext';
 import * as SplashScreen from 'expo-splash-screen';
 import {
   useFonts,
@@ -39,8 +41,10 @@ export default function RootLayout() {
     <SafeAreaProvider>
       {/* ClasesProvider comparte las clases guardadas con todas las pantallas */}
       <ClasesProvider>
-        {/* Stack = pila: cada pantalla nueva se apila encima y «Volver» la saca. */}
-        <Stack screenOptions={{ headerShown: false }} />
+        <ConversacionesProvider>
+          {/* Stack = pila: cada pantalla nueva se apila encima y «Volver» la saca. */}
+          <Stack screenOptions={{ headerShown: false }} />
+        </ConversacionesProvider>
       </ClasesProvider>
     </SafeAreaProvider>
   );

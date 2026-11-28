@@ -51,6 +51,9 @@ export function useVozATexto({ onFraseFinal } = {}) {
 
   // useRef: datos que cambian sin redibujar la pantalla
   const quiereEscucharRef = useRef(false); // el usuario quiere que siga escuchando
+  // Traducir y Diálogo usan este hook a la vez (las pestañas siguen montadas): solo la pantalla
+  // que inició el micrófono recibe los eventos, así una frase no aparece en las dos.
+  const propietarioRef = useRef(false);
   const idiomaRef = useRef(0); // índice en IDIOMAS
   const reintentosRef = useRef(0); // para esperar más tras errores seguidos
   const temporizadorRef = useRef(null);
@@ -86,10 +89,12 @@ export function useVozATexto({ onFraseFinal } = {}) {
     if (!Voz) return undefined;
     const subs = [
       Voz.addListener('start', () => {
+        if (!propietarioRef.current) return;
         setEstado('escuchando');
         setError(null);
       }),
       Voz.addListener('result', (evento) => {
+        if (!propietarioRef.current) return;
         const mejor = evento.results?.[0];
         const texto = (mejor?.transcript || '').trim();
         if (!texto) return;
@@ -102,10 +107,12 @@ export function useVozATexto({ onFraseFinal } = {}) {
         }
       }),
       Voz.addListener('volumechange', ({ value }) => {
+        if (!propietarioRef.current) return;
         // value va de -2 a 10; bajo 0 es silencio
         setVolumen(Math.max(0, Math.min(1, value / 10)));
       }),
       Voz.addListener('error', (evento) => {
+        if (!propietarioRef.current) return;
         if (evento.error === 'aborted') return;
         if (evento.error === 'language-not-supported' && idiomaRef.current < IDIOMAS.length - 1) {
           idiomaRef.current += 1; // prueba con el siguiente español
@@ -116,10 +123,12 @@ export function useVozATexto({ onFraseFinal } = {}) {
           return; // el evento "end" llega después y reinicia
         }
         quiereEscucharRef.current = false;
+        propietarioRef.current = false;
         setError({ codigo: evento.error, mensaje: MENSAJES_ERROR[evento.error] || `Error del reconocimiento de voz (${evento.error}).` });
         setEstado('error');
       }),
       Voz.addListener('end', () => {
+        if (!propietarioRef.current) return;
         setVolumen(0);
         if (esperandoFinRef.current) {
           esperandoFinRef.current();
@@ -128,6 +137,7 @@ export function useVozATexto({ onFraseFinal } = {}) {
         if (quiereEscucharRef.current) {
           programarReinicio(); // Android cortó por silencio: vuelve a escuchar
         } else {
+          propietarioRef.current = false; // terminó: libera el micrófono para la otra pantalla
           setEstado((anterior) => (anterior === 'error' ? 'error' : 'pausado'));
         }
       }),
@@ -147,6 +157,7 @@ export function useVozATexto({ onFraseFinal } = {}) {
     setError(null);
     reintentosRef.current = 0;
     quiereEscucharRef.current = true;
+    propietarioRef.current = true;
     arrancar();
     return true;
   }, [arrancar]);
@@ -178,7 +189,8 @@ export function useVozATexto({ onFraseFinal } = {}) {
   useEffect(() => () => {
     quiereEscucharRef.current = false;
     clearTimeout(temporizadorRef.current);
-    Voz?.abort();
+    if (propietarioRef.current) Voz?.abort();
+    propietarioRef.current = false;
   }, []);
 
   return {

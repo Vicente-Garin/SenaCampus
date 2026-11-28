@@ -4,6 +4,7 @@
  *   1. EXPO_PUBLIC_API_URL en mobile/.env (ej. https://senacampus-api.onrender.com/api), o
  *   2. la misma IP del computador que corre Expo, en el puerto 5000 (desarrollo en la misma red WiFi).
  * - traducirTexto(): POST /v1/traductor/parse → glosas LSCh o letras para deletrear.
+ * - pedirVozNube(): POST /v1/voz → dirección del mp3 con voz natural para leer un mensaje.
  */
 import Constants from 'expo-constants';
 
@@ -18,9 +19,9 @@ export const API_URL = process.env.EXPO_PUBLIC_API_URL || ipDelComputador();
 const TIEMPO_MAXIMO_MS = 8000;
 
 // fetch con tiempo máximo: si el servidor no responde, la app no se queda esperando
-const pedir = async (ruta, opciones = {}) => {
+const pedir = async (ruta, opciones = {}, tiempoMaximo = TIEMPO_MAXIMO_MS) => {
   const control = new AbortController();
-  const temporizador = setTimeout(() => control.abort(), TIEMPO_MAXIMO_MS);
+  const temporizador = setTimeout(() => control.abort(), tiempoMaximo);
   try {
     const respuesta = await fetch(`${API_URL}${ruta}`, {
       ...opciones,
@@ -57,3 +58,13 @@ export const traducirTexto = async (texto, contexto = 'academico') => {
 
 // Nombre anterior, se mantiene por compatibilidad
 export const parseTranscript = (texto, contexto) => traducirTexto(texto, contexto);
+
+/**
+ * Pide al servidor la voz natural (ElevenLabs) de un texto.
+ * Devuelve la URL del mp3 para el reproductor. Tiempo máximo corto: si tarda, la app
+ * usa la voz del teléfono para no dejar a la otra persona esperando.
+ */
+export const pedirVozNube = async (texto) => {
+  const json = await pedir('/v1/voz', { method: 'POST', body: JSON.stringify({ texto }) }, 5000);
+  return `${API_URL}${json.data.ruta}`;
+};
