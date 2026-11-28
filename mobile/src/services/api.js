@@ -1,35 +1,59 @@
 /**
- * CLIENTE HTTP DEL BACKEND (siguiente avance)
- * - POST /api/v1/traductor/parse: envía el texto y recibe glosas o letras.
- * - En el Avance 1 la app usa datos de ejemplo, así que este archivo aún no se usa.
+ * CLIENTE HTTP DEL BACKEND
+ * - Dirección del servidor:
+ *   1. EXPO_PUBLIC_API_URL en mobile/.env (ej. https://senacampus-api.onrender.com/api), o
+ *   2. la misma IP del computador que corre Expo, en el puerto 5000 (desarrollo en la misma red WiFi).
+ * - traducirTexto(): POST /v1/traductor/parse → glosas LSCh o letras para deletrear.
  */
-import { Platform } from 'react-native';
+import Constants from 'expo-constants';
 
-const LOCAL_IP = '192.168.20.185';
+const ipDelComputador = () => {
+  // hostUri llega como "192.168.1.20:8081" cuando la app se abre desde Expo
+  const host = Constants.expoConfig?.hostUri?.split(':')[0];
+  return host ? `http://${host}:5000/api` : 'http://localhost:5000/api';
+};
 
-const BASE_URL = Platform.select({
-  android: `http://${LOCAL_IP}:5000/api/v1`,
-  ios: `http://${LOCAL_IP}:5000/api/v1`,
-  default: `http://${LOCAL_IP}:5000/api/v1`
-});
+export const API_URL = process.env.EXPO_PUBLIC_API_URL || ipDelComputador();
 
-export const parseTranscript = async (texto, contexto = 'academico') => {
+const TIEMPO_MAXIMO_MS = 8000;
+
+// fetch con tiempo máximo: si el servidor no responde, la app no se queda esperando
+const pedir = async (ruta, opciones = {}) => {
+  const control = new AbortController();
+  const temporizador = setTimeout(() => control.abort(), TIEMPO_MAXIMO_MS);
   try {
-    const response = await fetch(`${BASE_URL}/traductor/parse`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json; charset=utf-8'
-      },
-      body: JSON.stringify({ texto, contexto })
+    const respuesta = await fetch(`${API_URL}${ruta}`, {
+      ...opciones,
+      headers: { 'Content-Type': 'application/json; charset=utf-8', ...opciones.headers },
+      signal: control.signal,
     });
-
-    if (!response.ok) {
-      throw new Error(`Error en el servidor: ${response.status}`);
+    const json = await respuesta.json().catch(() => ({}));
+    if (!respuesta.ok) {
+      const error = new Error(json.error || `Error del servidor (${respuesta.status})`);
+      error.estado = respuesta.status;
+      error.campos = json.campos;
+      throw error;
     }
-
-    return await response.json();
+    return json;
   } catch (error) {
-    console.error('Error al conectar con la API de traducción:', error.message);
+    if (error.name === 'AbortError') throw new Error('El servidor no respondió a tiempo.');
     throw error;
+  } finally {
+    clearTimeout(temporizador);
   }
 };
+
+/**
+ * Traduce una frase a glosas LSCh.
+ * Devuelve [{ id, termino, tipo: 'lottie' | 'gif' | 'dactilologia', asset, deletreo }]
+ */
+export const traducirTexto = async (texto, contexto = 'academico') => {
+  const json = await pedir('/v1/traductor/parse', {
+    method: 'POST',
+    body: JSON.stringify({ texto, contexto }),
+  });
+  return json.glosas || [];
+};
+
+// Nombre anterior, se mantiene por compatibilidad
+export const parseTranscript = (texto, contexto) => traducirTexto(texto, contexto);

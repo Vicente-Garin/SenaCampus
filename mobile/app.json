@@ -5,19 +5,23 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#FFF4E6"
-    },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "cl.ulagos.senacampus",
+      "infoPlist": {
+        "NSSpeechRecognitionUsageDescription": "SeñaCampus convierte la voz del docente en texto para traducirla a Lengua de Señas Chilena.",
+        "NSMicrophoneUsageDescription": "SeñaCampus usa el micrófono para escuchar al docente y mostrar la clase en Lengua de Señas Chilena y con subtítulos."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#B83A1E"
-      }
+      },
+      "package": "cl.ulagos.senacampus",
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "plugins": [
       "expo-status-bar",
@@ -31,9 +35,30 @@
           "resizeMode": "contain",
           "backgroundColor": "#FFF4E6"
         }
+      ],
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "SeñaCampus usa el micrófono para escuchar al docente y mostrar la clase en Lengua de Señas Chilena y con subtítulos.",
+          "speechRecognitionPermission": "SeñaCampus convierte la voz del docente en texto para traducirla a Lengua de Señas Chilena.",
+          "androidSpeechServicePackages": [
+            "com.google.android.googlequicksearchbox",
+            "com.google.android.tts"
+          ]
+        }
       ]
     ],
     "scheme": "senacampus",
-    "icon": "./assets/icon.png"
+    "icon": "./assets/icon.png",
+    "extra": {
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
+      },
+      "eas": {
+        "projectId": "7ac3737e-6548-421d-bd5b-541c22f24595"
+      }
+    }
   }
 }
