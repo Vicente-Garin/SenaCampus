@@ -7,7 +7,6 @@
  */
 import React, { useState } from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Copy, Hand, Trash2 } from 'lucide-react-native';
 import { COLORES } from '../../constants/colores';
@@ -18,6 +17,7 @@ import { BarraSuperior } from '../../components/BarraSuperior';
 import { Boton } from '../../components/Boton';
 import { Aviso } from '../../components/Aviso';
 import { VentanaConfirmacion } from '../../components/VentanaConfirmacion';
+import { Pantalla, BandaEncabezado, RotuloSeccion, PanelAcciones } from '../../components/Secciones';
 
 function resaltarClaves(texto, claves = []) {
   if (!claves.length) return texto;
@@ -61,12 +61,12 @@ export default function TranscripcionGuardadaScreen() {
   // Si la clase ya no existe (por ejemplo, recién eliminada) no se muestra nada roto
   if (!clase) {
     return (
-      <SafeAreaView style={styles.safeArea} edges={['top', 'bottom', 'left', 'right']}>
+      <Pantalla>
         <View style={styles.contenedor}>
           <BarraSuperior textoVolver="Historial" />
           <Aviso tipo="info" mensaje="Esta clase ya no existe o fue eliminada." />
         </View>
-      </SafeAreaView>
+      </Pantalla>
     );
   }
 
@@ -74,22 +74,26 @@ export default function TranscripcionGuardadaScreen() {
   const deletreadas = clase.deletreadas || [];
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom', 'left', 'right']}>
+    <Pantalla>
       <View style={styles.contenedor}>
-        <BarraSuperior
-          textoVolver="Historial"
-          accion={{ Icono: Copy, etiqueta: 'Copiar texto', onPress: manejarCopiar }}
-        />
-
-        <Text style={styles.titulo}>{clase.fecha}</Text>
-        <Text style={styles.meta}>
-          {clase.duracion} · {deletreadas.length} palabras deletreadas
-        </Text>
+        {/* 1. Encabezado: fecha y datos de la clase */}
+        <BandaEncabezado style={styles.banda}>
+          <BarraSuperior
+            textoVolver="Historial"
+            accion={{ Icono: Copy, etiqueta: 'Copiar texto', onPress: manejarCopiar }}
+          />
+          <Text style={styles.titulo}>{clase.fecha}</Text>
+          <Text style={styles.meta}>
+            {clase.duracion} · {deletreadas.length} palabras deletreadas
+          </Text>
+        </BandaEncabezado>
 
         {copiado && (
           <Aviso tipo="exito" mensaje="Texto copiado" style={styles.avisoCopiado} />
         )}
 
+        {/* 2. Contenido: transcripción */}
+        <RotuloSeccion texto="TRANSCRIPCIÓN" />
         <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
           {fragmentos.length === 0 && (
             <Aviso
@@ -107,12 +111,14 @@ export default function TranscripcionGuardadaScreen() {
           </View>
         </ScrollView>
 
-        <View style={styles.acciones}>
+        {/* 3. Acciones */}
+        <PanelAcciones>
           <Boton
-            etiqueta="Repasar señas"
+            etiqueta="Repasar asignatura"
             tipo="primario"
             Icono={Hand}
-            onPress={() => router.push('/(tabs)/traducir')}
+            // Reproduce esta clase desde el principio: frase por frase, con sus señas
+            onPress={() => router.push(`/repaso/${clase.id}`)}
           />
           <View style={styles.filaSecundaria}>
             <Boton
@@ -130,7 +136,7 @@ export default function TranscripcionGuardadaScreen() {
               style={styles.flexUno}
             />
           </View>
-        </View>
+        </PanelAcciones>
 
         <VentanaConfirmacion
           visible={confirmarEliminar}
@@ -142,20 +148,21 @@ export default function TranscripcionGuardadaScreen() {
           onCancelar={() => setConfirmarEliminar(false)}
         />
       </View>
-    </SafeAreaView>
+    </Pantalla>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: COLORES.crema },
   contenedor: {
     flex: 1,
     paddingHorizontal: MEDIDAS.margenPantalla,
     paddingBottom: 14,
+    gap: 12,
   },
-  titulo: { ...TIPOGRAFIA.tituloPantalla, color: COLORES.tinta, marginBottom: 4 },
-  meta: { ...TIPOGRAFIA.cuerpo, color: COLORES.tintaSuave, marginBottom: 14 },
-  avisoCopiado: { marginBottom: 12 },
+  banda: { paddingTop: 0 }, // la barra superior ya da el aire de arriba
+  titulo: { ...TIPOGRAFIA.tituloPantalla, color: COLORES.tinta },
+  meta: { ...TIPOGRAFIA.cuerpo, color: COLORES.tintaSuave },
+  avisoCopiado: {},
   scroll: { flex: 1 },
   cajaTranscripcion: {
     backgroundColor: COLORES.blanco,
@@ -169,7 +176,6 @@ const styles = StyleSheet.create({
   hora: { ...TIPOGRAFIA.etiqueta, color: COLORES.tintaSuave },
   texto: { ...TIPOGRAFIA.cuerpo, color: COLORES.tinta },
   clave: { ...TIPOGRAFIA.cuerpoDestacado, color: COLORES.azul },
-  acciones: { gap: 10, paddingTop: 12 },
   filaSecundaria: { flexDirection: 'row', gap: 10 },
   flexUno: { flex: 1 },
 });
