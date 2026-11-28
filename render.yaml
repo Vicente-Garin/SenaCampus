@@ -1,0 +1,24 @@
+# Despliegue del backend de SeñaCampus en Render (Blueprint).
+# Render lee este archivo y crea el servicio web; los secretos se escriben en el panel de Render,
+# nunca aquí (sync: false = "pídemelo al crear el servicio").
+services:
+  - type: web
+    name: senacampus-api
+    runtime: node
+    plan: free
+    region: virginia
+    rootDir: server            # el backend vive en la carpeta server/ del repositorio
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeploy: true           # cada push a la rama conectada vuelve a publicar
+    envVars:
+      - key: MONGO_URI         # cadena de MongoDB Atlas (la misma de server/.env)
+        sync: false
+      - key: ELEVENLABS_API_KEY
+        sync: false
+      - key: ELEVENLABS_VOZ_ID
+        sync: false
+      # Producción: nunca "desarrollo". Las rutas con datos del estudiante esperan Firebase.
+      - key: AUTH_MODO
+        value: produccion

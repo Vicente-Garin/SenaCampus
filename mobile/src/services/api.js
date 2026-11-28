@@ -5,6 +5,7 @@
  *   2. la misma IP del computador que corre Expo, en el puerto 5000 (desarrollo en la misma red WiFi).
  * - traducirTexto(): POST /v1/traductor/parse → glosas LSCh o letras para deletrear.
  * - pedirVozNube(): POST /v1/voz → dirección del mp3 con voz natural para leer un mensaje.
+ * - despertarServidor(): en Render (plan gratis) el servidor se duerme; se llama al abrir la app.
  */
 import Constants from 'expo-constants';
 
@@ -67,4 +68,18 @@ export const parseTranscript = (texto, contexto) => traducirTexto(texto, context
 export const pedirVozNube = async (texto) => {
   const json = await pedir('/v1/voz', { method: 'POST', body: JSON.stringify({ texto }) }, 5000);
   return `${API_URL}${json.data.ruta}`;
+};
+
+/**
+ * Render (plan gratis) apaga el servidor tras 15 minutos sin uso y tarda ~1 minuto en volver.
+ * Se llama al abrir la app: mientras el estudiante elige su asignatura, el servidor ya despierta.
+ * No lanza errores: si falla, cada pantalla usa su respaldo (deletreo local, voz del teléfono).
+ */
+export const despertarServidor = async () => {
+  try {
+    await pedir('/health', {}, 70000);
+    return true;
+  } catch {
+    return false;
+  }
 };

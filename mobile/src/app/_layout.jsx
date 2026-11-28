@@ -11,6 +11,7 @@ import { Stack } from 'expo-router';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ClasesProvider } from '../context/ClasesContext';
 import { ConversacionesProvider } from '../context/ConversacionesContext';
+import { despertarServidor } from '../services/api';
 import * as SplashScreen from 'expo-splash-screen';
 import {
   useFonts,
@@ -28,6 +29,11 @@ export default function RootLayout() {
     Nunito_700Bold,
     Nunito_800ExtraBold,
   });
+
+  // Despierta el backend de Render apenas se abre la app (ver services/api.js)
+  useEffect(() => {
+    despertarServidor();
+  }, []);
 
   useEffect(() => {
     if (fuentesCargadas) {
