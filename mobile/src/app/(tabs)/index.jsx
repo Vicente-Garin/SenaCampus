@@ -1,6 +1,6 @@
 /**
  * PANTALLA 5 · ASIGNATURAS (inicio) · ruta "/(tabs)"
- * - Datos: asignaturas y clases desde el Context (useClases); nombre desde USUARIO.
+ * - Datos: asignaturas y clases desde el Context (useClases); nombre desde la sesión (perfil en MongoDB).
  * - Interacción: tocar una tarjeta -> router.push a /asignatura/[id];
  *   botón "Agregar asignatura" -> <Link> a /nueva-asignatura; ajustes -> /ajustes.
  */
@@ -12,7 +12,7 @@ import { BookOpen, Hand, SlidersHorizontal, Plus } from 'lucide-react-native';
 import { COLORES } from '../../constants/colores';
 import { TIPOGRAFIA } from '../../constants/tipografia';
 import { MEDIDAS } from '../../constants/medidas';
-import { USUARIO } from '../../data/mockData';
+import { useSesion } from '../../context/SesionContext';
 import { Aviso } from '../../components/Aviso';
 import { Tarjeta } from '../../components/Tarjeta';
 import { Boton } from '../../components/Boton';
@@ -21,6 +21,7 @@ import { useClases } from '../../context/ClasesContext';
 
 export default function AsignaturasScreen() {
   const router = useRouter();
+  const { perfil } = useSesion();
   // El contador de clases sale del estado compartido: sube al guardar una clase
   const { asignaturas, clasesPorAsignatura, ultimaAsignaturaId } = useClases();
   // "Retomar…" abre la última asignatura que se tradujo (si todavía existe)
@@ -33,7 +34,7 @@ export default function AsignaturasScreen() {
         <BandaEncabezado>
           <View style={styles.encabezado}>
             {/* El nombre viene de data/mockData.js (USUARIO), no está escrito a mano */}
-            <Text style={styles.titulo}>Hola, {USUARIO.nombre}</Text>
+            <Text style={styles.titulo}>Hola{perfil?.nombre ? `, ${perfil.nombre}` : ''}</Text>
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Ajustes"

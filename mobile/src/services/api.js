@@ -6,8 +6,10 @@
  * - traducirTexto(): POST /v1/traductor/parse → glosas LSCh o letras para deletrear.
  * - pedirVozNube(): POST /v1/voz → dirección del mp3 con voz natural para leer un mensaje.
  * - despertarServidor(): en Render (plan gratis) el servidor se duerme; se llama al abrir la app.
+ * - Rutas del estudiante (perfil, asignaturas…): envían el token de Firebase en Authorization.
  */
 import Constants from 'expo-constants';
+import { auth } from './firebase';
 
 const ipDelComputador = () => {
   // hostUri llega como "192.168.1.20:8081" cuando la app se abre desde Expo
@@ -83,3 +85,22 @@ export const despertarServidor = async () => {
     return false;
   }
 };
+
+// Igual que pedir(), pero con el token de la sesión de Firebase (lo exige el servidor)
+const pedirConSesion = async (ruta, opciones = {}) => {
+  const usuario = auth?.currentUser;
+  if (!usuario) {
+    const error = new Error('Inicia sesión para continuar.');
+    error.estado = 401;
+    throw error;
+  }
+  const token = await usuario.getIdToken(); // Firebase lo renueva solo cuando está por vencer
+  return pedir(ruta, { ...opciones, headers: { ...opciones.headers, Authorization: `Bearer ${token}` } }, 70000);
+};
+
+// Perfil del estudiante (GET /v1/usuarios/me). Si la cuenta no tiene perfil: error.estado 404
+export const obtenerPerfil = async () => (await pedirConSesion('/v1/usuarios/me')).data;
+
+// Crea el perfil de una cuenta nueva: { nombre, apellido, sede, carrera? }
+export const crearPerfil = async (datos) =>
+  (await pedirConSesion('/v1/usuarios', { method: 'POST', body: JSON.stringify(datos) })).data;

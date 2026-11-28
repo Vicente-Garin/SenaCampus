@@ -1,11 +1,11 @@
 /**
  * PANTALLA 11 · AJUSTES · ruta "/ajustes" (se abre desde Asignaturas)
  * - Estado local de cada interruptor y de la velocidad (useState).
- * - Cerrar sesión -> router.replace('/') vuelve al Acceso.
+ * - Cerrar sesión: cierra la sesión de Firebase; GuardiaSesion vuelve al Acceso.
  */
 import React, { useState } from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useSesion } from '../context/SesionContext';
 import { ALargeSmall, Captions, Vibrate, Gauge, Globe, LogOut } from 'lucide-react-native';
 import { COLORES } from '../constants/colores';
 import { TIPOGRAFIA } from '../constants/tipografia';
@@ -21,7 +21,7 @@ const VELOCIDADES = ['0.75x (lenta)', '1x (normal)', '1.5x (rápida)'];
 
 // Pantalla 11 · Ajustes (Figma). Se abre desde el botón de ajustes de Asignaturas.
 export default function AjustesScreen() {
-  const router = useRouter();
+  const { cerrarSesion } = useSesion();
 
   // Estado local de cada ajuste: al cambiar, React vuelve a dibujar la pantalla
   const [textoGrande, setTextoGrande] = useState(false);
@@ -90,7 +90,7 @@ export default function AjustesScreen() {
             etiqueta="Cerrar sesión"
             tipo="secundario"
             Icono={LogOut}
-            onPress={() => router.replace('/')}
+            onPress={cerrarSesion}
           />
         </PanelAcciones>
       </View>
