@@ -90,14 +90,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  // maxWidth + flexShrink: si el texto es largo (ej. "Retomar Tecnologías Web y Móviles")
+  // se corta con "…" dentro del botón, y el ícono y los márgenes quedan siempre iguales.
   contenido: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 10,
+    maxWidth: '100%',
   },
   etiqueta: {
     ...TIPOGRAFIA.cuerpoDestacado,
+    flexShrink: 1,
   },
 });
 

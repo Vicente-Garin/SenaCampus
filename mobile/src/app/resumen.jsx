@@ -5,7 +5,6 @@
  */
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Check, Clock, Type } from 'lucide-react-native';
 import { COLORES } from '../constants/colores';
@@ -13,6 +12,7 @@ import { TIPOGRAFIA } from '../constants/tipografia';
 import { MEDIDAS } from '../constants/medidas';
 import { Tarjeta } from '../components/Tarjeta';
 import { Boton } from '../components/Boton';
+import { Pantalla, BandaEncabezado, RotuloSeccion, PanelAcciones } from '../components/Secciones';
 import { useClases } from '../context/ClasesContext';
 
 export default function ResumenScreen() {
@@ -24,9 +24,10 @@ export default function ResumenScreen() {
   const deletreadas = clase.deletreadas || [];
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom', 'left', 'right']}>
+    <Pantalla>
       <View style={styles.contenedor}>
-        <View style={styles.contenido}>
+        {/* 1. Encabezado: confirmación */}
+        <BandaEncabezado style={styles.banda}>
           <View style={styles.circuloExito}>
             <Check size={44} strokeWidth={2.5} color={COLORES.exito} />
           </View>
@@ -36,7 +37,11 @@ export default function ResumenScreen() {
           <Text style={styles.subtitulo}>
             Ya puedes repasarla cuando quieras, incluso sin conexión.
           </Text>
+        </BandaEncabezado>
 
+        {/* 2. Contenido: datos de la clase */}
+        <View style={styles.contenido}>
+          <RotuloSeccion texto="RESUMEN DE LA CLASE" />
           <View style={styles.tarjetas}>
             <Tarjeta
               titulo="Duración"
@@ -53,7 +58,8 @@ export default function ResumenScreen() {
           </View>
         </View>
 
-        <View style={styles.acciones}>
+        {/* 3. Acciones */}
+        <PanelAcciones>
           <Boton
             etiqueta="Ver transcripción"
             tipo="primario"
@@ -64,22 +70,21 @@ export default function ResumenScreen() {
             tipo="texto"
             onPress={() => router.replace('/(tabs)')}
           />
-        </View>
+        </PanelAcciones>
       </View>
-    </SafeAreaView>
+    </Pantalla>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: COLORES.crema },
   contenedor: {
     flex: 1,
     paddingHorizontal: MEDIDAS.margenPantalla,
-    paddingTop: 32,
     paddingBottom: 16,
-    justifyContent: 'space-between',
+    gap: 16,
   },
-  contenido: { gap: 12 },
+  banda: { paddingTop: 24, gap: 8 },
+  contenido: { flex: 1, gap: 12 },
   circuloExito: {
     width: 88,
     height: 88,
@@ -91,7 +96,6 @@ const styles = StyleSheet.create({
   },
   titulo: { ...TIPOGRAFIA.tituloPantalla, color: COLORES.tinta },
   nombreClase: { ...TIPOGRAFIA.cuerpoDestacado, color: COLORES.tinta },
-  subtitulo: { ...TIPOGRAFIA.cuerpo, color: COLORES.tintaSuave, marginBottom: 12 },
+  subtitulo: { ...TIPOGRAFIA.cuerpo, color: COLORES.tintaSuave },
   tarjetas: { gap: 12 },
-  acciones: { gap: 8 },
 });

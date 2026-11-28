@@ -16,6 +16,7 @@ import { USUARIO } from '../../data/mockData';
 import { Aviso } from '../../components/Aviso';
 import { Tarjeta } from '../../components/Tarjeta';
 import { Boton } from '../../components/Boton';
+import { BandaEncabezado, RotuloSeccion, PanelAcciones } from '../../components/Secciones';
 import { useClases } from '../../context/ClasesContext';
 
 export default function AsignaturasScreen() {
@@ -28,48 +29,32 @@ export default function AsignaturasScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
       <View style={styles.contenedor}>
-        <View style={styles.encabezado}>
-          {/* El nombre viene de data/mockData.js (USUARIO), no está escrito a mano */}
-          <Text style={styles.titulo}>Hola, {USUARIO.nombre}</Text>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Ajustes"
-            // router.push: navega por código y apila la pantalla de Ajustes.
-            onPress={() => router.push('/ajustes')}
-            hitSlop={4}
-            style={({ pressed }) => [
-              styles.botonAjustes,
-              pressed && { backgroundColor: COLORES.azulSuave },
-            ]}
-          >
-            <SlidersHorizontal size={22} strokeWidth={2} color={COLORES.tinta} />
-          </Pressable>
-        </View>
-
-        <Text style={styles.subtitulo}>¿Qué clase vas a seguir hoy?</Text>
-
-        <Aviso
-          tipo="info"
-          mensaje="Próxima clase: Tecnologías Web y Móviles, hoy a las 10:15."
-          style={styles.aviso}
-        />
-
-        {/* Rótulo de la lista + acción ocasional "Agregar" junto a la lista que modifica */}
-        <View style={styles.filaRotulo}>
-          <Text style={styles.rotulo}>TUS ASIGNATURAS</Text>
-          {/* <Link>: navegación declarativa (como un enlace). asChild hace que el Pressable sea el enlace.
-              La otra forma es router.push(...) por código, como en las tarjetas. */}
-          <Link href="/nueva-asignatura" asChild>
+        {/* 1. Encabezado (franja de color): saludo, ajustes y próxima clase */}
+        <BandaEncabezado>
+          <View style={styles.encabezado}>
+            {/* El nombre viene de data/mockData.js (USUARIO), no está escrito a mano */}
+            <Text style={styles.titulo}>Hola, {USUARIO.nombre}</Text>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Agregar asignatura"
-              style={({ pressed }) => [styles.botonAgregar, pressed && styles.botonAgregarPresionado]}
+              accessibilityLabel="Ajustes"
+              // router.push: navega por código y apila la pantalla de Ajustes.
+              onPress={() => router.push('/ajustes')}
+              hitSlop={4}
+              style={({ pressed }) => [
+                styles.botonAjustes,
+                pressed && { backgroundColor: COLORES.azulSuave },
+              ]}
             >
-              <Plus size={20} strokeWidth={2.5} color={COLORES.blanco} />
-              <Text style={styles.textoAgregar}>Agregar asignatura</Text>
+              <SlidersHorizontal size={22} strokeWidth={2} color={COLORES.tinta} />
             </Pressable>
-          </Link>
-        </View>
+          </View>
+          <Text style={styles.subtitulo}>¿Qué clase vas a seguir hoy?</Text>
+          <Aviso tipo="info" mensaje="Próxima clase: Tecnologías Web y Móviles, hoy a las 10:15." />
+        </BandaEncabezado>
+
+        {/* 2. Contenido: lo más usado (tus asignaturas) arriba; "Agregar" al final de la lista,
+            porque se usa pocas veces y es donde aparecerá la asignatura nueva */}
+        <RotuloSeccion texto="TUS ASIGNATURAS" style={styles.rotulo} />
 
         {/* FlatList: lista que puede crecer; solo dibuja lo visible (mejor que ScrollView + .map). */}
         <FlatList
@@ -86,10 +71,32 @@ export default function AsignaturasScreen() {
               onPress={() => router.push(`/asignatura/${item.id}`)}
             />
           )}
+          ListFooterComponent={
+            /* <Link>: navegación declarativa (como un enlace). asChild hace que el Pressable sea el enlace.
+               La otra forma es router.push(...) por código, como en las tarjetas.
+               Ojo: con asChild, Link descarta los estilos escritos como función ({ pressed }) => …,
+               por eso el fondo azul va en un estilo fijo y el efecto al presionar va en el contenido. */
+            <Link href="/nueva-asignatura" asChild>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Agregar asignatura"
+                style={styles.botonAgregar}
+                android_ripple={{ color: COLORES.azulSuave }}
+              >
+                {({ pressed }) => (
+                  <View style={[styles.contenidoAgregar, pressed && styles.botonAgregarPresionado]}>
+                    <Plus size={22} strokeWidth={2.5} color={COLORES.blanco} />
+                    <Text style={styles.textoAgregar}>Agregar asignatura</Text>
+                  </View>
+                )}
+              </Pressable>
+            </Link>
+          }
         />
 
+        {/* 3. Acción principal en su propio panel */}
         {ultima && (
-          <View style={styles.accionInferior}>
+          <PanelAcciones>
             <Boton
               etiqueta={`Retomar ${ultima.nombre}`}
               tipo="primario"
@@ -98,7 +105,7 @@ export default function AsignaturasScreen() {
                 router.push({ pathname: '/(tabs)/traducir', params: { asignaturaId: ultima.id } })
               }
             />
-          </View>
+          </PanelAcciones>
         )}
       </View>
     </SafeAreaView>
@@ -106,20 +113,21 @@ export default function AsignaturasScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: COLORES.crema },
+  // El área superior toma el color de la franja; el resto de la pantalla es crema
+  safeArea: { flex: 1, backgroundColor: COLORES.cremaEncabezado },
   // Flexbox: flex: 1 ocupa todo el alto; los hijos van en columna (dirección por defecto).
   contenedor: {
     flex: 1,
+    backgroundColor: COLORES.crema,
     paddingHorizontal: MEDIDAS.margenPantalla,
-    paddingTop: 12,
     paddingBottom: 14,
+    gap: 14,
   },
   // Fila: título a la izquierda y botón a la derecha (space-between).
   encabezado: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 4,
   },
   titulo: { ...TIPOGRAFIA.tituloPantalla, color: COLORES.tinta },
   botonAjustes: {
@@ -132,34 +140,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  subtitulo: {
-    ...TIPOGRAFIA.cuerpo,
-    color: COLORES.tintaSuave,
-    marginBottom: 14,
-  },
-  aviso: { marginBottom: 18 },
-  filaRotulo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 10,
-  },
-  rotulo: {
-    ...TIPOGRAFIA.etiqueta,
-    color: COLORES.tintaSuave,
-  },
-  // Botón azul sólido para crear una asignatura nueva (blanco sobre azul: contraste 10:1)
+  subtitulo: { ...TIPOGRAFIA.cuerpo, color: COLORES.tintaSuave, marginBottom: 6 },
+  rotulo: { marginTop: 4 },
+  // Botón azul sólido al final de la lista (blanco sobre azul: contraste 10:1)
   botonAgregar: {
-    minHeight: MEDIDAS.altos.tactilMin, // 44 pt de área táctil
-    paddingHorizontal: 16,
-    borderRadius: MEDIDAS.radios.chip,
+    height: MEDIDAS.altos.boton, // mismo alto que los demás botones (54)
+    borderRadius: MEDIDAS.radios.boton,
     backgroundColor: COLORES.azul,
-    flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
-    gap: 6,
+    overflow: 'hidden', // la onda de Android queda dentro de las esquinas redondeadas
   },
-  botonAgregarPresionado: { opacity: 0.85, transform: [{ scale: 0.97 }] },
+  contenidoAgregar: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  botonAgregarPresionado: { opacity: 0.7 },
   textoAgregar: { ...TIPOGRAFIA.cuerpoDestacado, color: COLORES.blanco },
-  lista: { gap: 12, paddingBottom: 16 },
-  accionInferior: { paddingTop: 8 },
+  lista: { gap: 12, paddingBottom: 4 },
 });

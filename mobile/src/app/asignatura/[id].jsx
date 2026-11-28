@@ -6,7 +6,6 @@
  */
 import React from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Clock, Hand, Inbox } from 'lucide-react-native';
 import { COLORES } from '../../constants/colores';
@@ -16,6 +15,7 @@ import { useClases } from '../../context/ClasesContext';
 import { BarraSuperior } from '../../components/BarraSuperior';
 import { Tarjeta } from '../../components/Tarjeta';
 import { Boton } from '../../components/Boton';
+import { Pantalla, BandaEncabezado, RotuloSeccion, PanelAcciones } from '../../components/Secciones';
 
 export default function DetalleAsignaturaScreen() {
   // El nombre del archivo [id] crea una ruta dinámica; aquí se lee ese parámetro.
@@ -28,17 +28,20 @@ export default function DetalleAsignaturaScreen() {
   const clases = clasesPorAsignatura[asignatura.id] || [];
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom', 'left', 'right']}>
+    <Pantalla>
       <View style={styles.contenedor}>
-        <BarraSuperior textoVolver="Asignaturas" />
+        {/* 1. Encabezado: datos de la asignatura */}
+        <BandaEncabezado style={styles.banda}>
+          <BarraSuperior textoVolver="Asignaturas" />
+          <Text style={styles.titulo}>{asignatura.nombre}</Text>
+          <Text style={styles.meta}>
+            Sala {asignatura.sala} · {asignatura.profesor}
+          </Text>
+          <Text style={styles.meta}>{asignatura.horario}</Text>
+        </BandaEncabezado>
 
-        <Text style={styles.titulo}>{asignatura.nombre}</Text>
-        <Text style={styles.meta}>
-          Sala {asignatura.sala} · {asignatura.profesor}
-        </Text>
-        <Text style={styles.meta}>{asignatura.horario}</Text>
-
-        <Text style={styles.rotulo}>HISTORIAL DE CLASES</Text>
+        {/* 2. Contenido: historial */}
+        <RotuloSeccion texto="HISTORIAL DE CLASES" />
 
         {clases.length === 0 ? (
           <View style={styles.vacio}>
@@ -74,7 +77,8 @@ export default function DetalleAsignaturaScreen() {
           />
         )}
 
-        <View style={styles.accionInferior}>
+        {/* 3. Acción principal */}
+        <PanelAcciones>
           <Boton
             etiqueta="Traducir esta clase"
             tipo="primario"
@@ -83,27 +87,22 @@ export default function DetalleAsignaturaScreen() {
                 router.push({ pathname: '/(tabs)/traducir', params: { asignaturaId: asignatura.id } })
               }
           />
-        </View>
+        </PanelAcciones>
       </View>
-    </SafeAreaView>
+    </Pantalla>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: COLORES.crema },
   contenedor: {
     flex: 1,
     paddingHorizontal: MEDIDAS.margenPantalla,
     paddingBottom: 14,
+    gap: 14,
   },
-  titulo: { ...TIPOGRAFIA.tituloPantalla, color: COLORES.tinta, marginBottom: 6 },
+  banda: { paddingTop: 0 }, // la barra superior ya da el aire de arriba
+  titulo: { ...TIPOGRAFIA.tituloPantalla, color: COLORES.tinta },
   meta: { ...TIPOGRAFIA.cuerpo, color: COLORES.tintaSuave },
-  rotulo: {
-    ...TIPOGRAFIA.etiqueta,
-    color: COLORES.tintaSuave,
-    marginTop: 18,
-    marginBottom: 10,
-  },
   lista: { gap: 12, paddingBottom: 16 },
   vacio: {
     flex: 1,
@@ -128,5 +127,4 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 8,
   },
-  accionInferior: { paddingTop: 8 },
 });

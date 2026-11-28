@@ -5,7 +5,6 @@
  */
 import React, { useState } from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { ALargeSmall, Captions, Vibrate, Gauge, Globe, LogOut } from 'lucide-react-native';
 import { COLORES } from '../constants/colores';
@@ -16,6 +15,7 @@ import { FilaAjuste } from '../components/FilaAjuste';
 import { Tarjeta } from '../components/Tarjeta';
 import { Aviso } from '../components/Aviso';
 import { Boton } from '../components/Boton';
+import { Pantalla, BandaEncabezado, RotuloSeccion, PanelAcciones } from '../components/Secciones';
 
 const VELOCIDADES = ['0.75x (lenta)', '1x (normal)', '1.5x (rápida)'];
 
@@ -30,13 +30,17 @@ export default function AjustesScreen() {
   const [indiceVelocidad, setIndiceVelocidad] = useState(1);
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom', 'left', 'right']}>
+    <Pantalla>
       <View style={styles.contenedor}>
-        <BarraSuperior textoVolver="Inicio" />
-
-        <ScrollView contentContainerStyle={styles.lista} showsVerticalScrollIndicator={false}>
+        {/* 1. Encabezado */}
+        <BandaEncabezado style={styles.banda}>
+          <BarraSuperior textoVolver="Inicio" />
           <Text style={styles.titulo}>Ajustes</Text>
+        </BandaEncabezado>
 
+        {/* 2. Contenido agrupado por secciones */}
+        <ScrollView contentContainerStyle={styles.lista} showsVerticalScrollIndicator={false}>
+          <RotuloSeccion texto="ACCESIBILIDAD" />
           <FilaAjuste
             titulo="Texto grande"
             detalle="Subtítulos más fáciles de leer"
@@ -59,6 +63,7 @@ export default function AjustesScreen() {
             onCambiar={setVibrar}
           />
 
+          <RotuloSeccion texto="SEÑAS Y VOZ" style={styles.rotulo} />
           {/* Al tocar, rota entre las tres velocidades */}
           <Tarjeta
             titulo="Velocidad de las señas"
@@ -79,27 +84,29 @@ export default function AjustesScreen() {
           />
         </ScrollView>
 
-        <View style={styles.accionInferior}>
+        {/* 3. Acciones */}
+        <PanelAcciones>
           <Boton
             etiqueta="Cerrar sesión"
             tipo="secundario"
             Icono={LogOut}
             onPress={() => router.replace('/')}
           />
-        </View>
+        </PanelAcciones>
       </View>
-    </SafeAreaView>
+    </Pantalla>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: COLORES.crema },
   contenedor: {
     flex: 1,
     paddingHorizontal: MEDIDAS.margenPantalla,
     paddingBottom: 14,
+    gap: 14,
   },
+  banda: { paddingTop: 0 }, // la barra superior ya da el aire de arriba
+  rotulo: { marginTop: 8 },
   lista: { gap: 12, paddingBottom: 16 },
-  titulo: { ...TIPOGRAFIA.tituloPantalla, color: COLORES.tinta, marginBottom: 4 },
-  accionInferior: { paddingTop: 8 },
+  titulo: { ...TIPOGRAFIA.tituloPantalla, color: COLORES.tinta },
 });

@@ -10,6 +10,7 @@ export const COLORES = {
   mentaOscura: '#14695A',    // Secundario
   durazno: '#FFDDB8',        // Fondo cálido del visor de señas
   crema: '#FFF4E6',          // Fondo base de todas las pantallas
+  cremaEncabezado: '#F5E6D3', // Franja del encabezado: el mismo crema, un poco más oscuro (13,3:1 con tinta)
   blanco: '#FFFFFF',         // Superficie de tarjetas, campos y barra de pestañas
   tinta: '#2B1D1A',          // Texto principal (14,95:1 sobre crema)
   tintaSuave: '#6B5A54',     // Texto secundario e íconos inactivos (6,01:1)

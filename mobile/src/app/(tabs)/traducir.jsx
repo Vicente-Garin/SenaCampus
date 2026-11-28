@@ -24,6 +24,7 @@ import { Boton } from '../../components/Boton';
 import { Aviso } from '../../components/Aviso';
 import { VentanaConfirmacion } from '../../components/VentanaConfirmacion';
 import { Tarjeta } from '../../components/Tarjeta';
+import { BandaEncabezado, RotuloSeccion, PanelAcciones } from '../../components/Secciones';
 
 const VELOCIDADES = ['0.75x', '1x', '1.5x'];
 const FACTOR_VELOCIDAD = [0.75, 1, 1.5];
@@ -217,10 +218,13 @@ export default function TraducirScreen() {
     return (
       <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
         <View style={styles.contenedor}>
-          <Text style={styles.tituloSeleccion}>¿Qué clase vas a traducir?</Text>
-          <Text style={styles.textoSeleccion}>
-            Elige la asignatura para guardar la transcripción en su historial.
-          </Text>
+          <BandaEncabezado>
+            <Text style={styles.tituloSeleccion}>¿Qué clase vas a traducir?</Text>
+            <Text style={styles.textoSeleccion}>
+              Elige la asignatura para guardar la transcripción en su historial.
+            </Text>
+          </BandaEncabezado>
+          <RotuloSeccion texto="TUS ASIGNATURAS" />
           <FlatList
             data={asignaturas}
             keyExtractor={(item) => item.id}
@@ -255,14 +259,9 @@ export default function TraducirScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
       <View style={styles.contenedor}>
-        {/* Parte central desplazable: en pantallas chicas nada queda oculto ni se corta */}
-        <ScrollView
-          style={styles.scroll}
-          contentContainerStyle={styles.contenidoScroll}
-          showsVerticalScrollIndicator={false}
-        >
+        {/* 1. Encabezado: asignatura y estado del micrófono */}
+        <BandaEncabezado>
           <Text style={styles.titulo}>{asignatura.nombre}</Text>
-
           <View style={styles.filaEstado}>
             <Chip
               texto={textoEstado}
@@ -276,7 +275,14 @@ export default function TraducirScreen() {
               </View>
             )}
           </View>
+        </BandaEncabezado>
 
+        {/* 2. Contenido desplazable: en pantallas chicas nada queda oculto ni se corta */}
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.contenidoScroll}
+          showsVerticalScrollIndicator={false}
+        >
           {!voz.disponible && (
             <Aviso
               tipo="info"
@@ -311,7 +317,7 @@ export default function TraducirScreen() {
             />
           </View>
 
-          <Text style={styles.rotulo}>PRÓXIMAS SEÑAS</Text>
+          <RotuloSeccion texto="PRÓXIMAS SEÑAS" />
           {/* Fila horizontal desplazable: las señas no se parten en dos líneas */}
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filaSenas}>
             {colaSenas.length === 0 ? (
@@ -329,6 +335,7 @@ export default function TraducirScreen() {
             )}
           </ScrollView>
 
+          <RotuloSeccion texto="SUBTÍTULOS" />
           <View style={styles.cajaSubtitulo} accessibilityLiveRegion="polite">
             <Text style={[styles.textoSubtitulo, voz.textoParcial ? styles.textoParcial : null]}>
               {renderizarSubtitulo(subtitulo)}
@@ -336,7 +343,8 @@ export default function TraducirScreen() {
           </View>
         </ScrollView>
 
-        <View style={styles.filaInferior}>
+        {/* 3. Acciones */}
+        <PanelAcciones style={styles.filaInferior}>
           <Boton
             etiqueta={escuchando ? 'Pausar' : 'Reanudar'}
             tipo="primario"
@@ -354,7 +362,7 @@ export default function TraducirScreen() {
             }}
             style={styles.flexUno}
           />
-        </View>
+        </PanelAcciones>
 
         <VentanaConfirmacion
           visible={modalVisible}
@@ -374,11 +382,13 @@ export default function TraducirScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: COLORES.crema },
+  // El área de la barra de estado toma el color de la franja del encabezado
+  safeArea: { flex: 1, backgroundColor: COLORES.cremaEncabezado },
   contenedor: {
     flex: 1,
+    backgroundColor: COLORES.crema,
     paddingHorizontal: MEDIDAS.margenPantalla,
-    paddingTop: 10,
+    paddingTop: 0, // la franja del encabezado llega al borde superior
     paddingBottom: 12,
     gap: 12,
   },
