@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const translationRoutes = require('./routes/translationRoutes');
 const apiRoutes = require('./routes/apiRoutes');
+const vozRoutes = require('./routes/vozRoutes');
 const { manejarErrores, rutaNoEncontrada } = require('./middlewares/errores');
 
 const app = express();
@@ -17,6 +18,9 @@ app.get('/api/health', (req, res) => {
 
 // Traductor (público: solo lee el diccionario)
 app.use('/api/v1/traductor', translationRoutes);
+
+// Voz natural para leer los mensajes del Diálogo (la clave de ElevenLabs queda en el servidor)
+app.use('/api/v1/voz', vozRoutes);
 
 // Datos del estudiante (requieren identificar al usuario)
 app.use('/api/v1', apiRoutes);
