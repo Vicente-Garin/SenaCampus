@@ -3,12 +3,13 @@
  * - Solo lectura: no se puede volver a grabar aquí (decisión de UX).
  * - Datos: la clase y su transcripción desde el Context.
  * - Interacción: copiar texto (muestra un aviso 2 s con useState + setTimeout).
+ * - Eliminar transcripción: pide confirmación, borra la clase del Context y vuelve al historial.
  */
 import React, { useState } from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Copy, Hand } from 'lucide-react-native';
+import { Copy, Hand, Trash2 } from 'lucide-react-native';
 import { COLORES } from '../../constants/colores';
 import { TIPOGRAFIA } from '../../constants/tipografia';
 import { MEDIDAS } from '../../constants/medidas';
@@ -16,6 +17,7 @@ import { useClases } from '../../context/ClasesContext';
 import { BarraSuperior } from '../../components/BarraSuperior';
 import { Boton } from '../../components/Boton';
 import { Aviso } from '../../components/Aviso';
+import { VentanaConfirmacion } from '../../components/VentanaConfirmacion';
 
 function resaltarClaves(texto, claves = []) {
   if (!claves.length) return texto;
@@ -38,17 +40,38 @@ export default function TranscripcionGuardadaScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const [copiado, setCopiado] = useState(false);
+  const [confirmarEliminar, setConfirmarEliminar] = useState(false);
 
   // Datos de la clase desde el estado compartido (incluye las recién guardadas)
-  const { transcripciones, buscarClase } = useClases();
-  const clase = buscarClase(id) || buscarClase('c18');
-  const fragmentos = transcripciones[clase.id] || [];
-  const deletreadas = clase.deletreadas || [];
+  const { transcripciones, buscarClase, eliminarClase } = useClases();
+  const clase = buscarClase(id);
 
   const manejarCopiar = () => {
     setCopiado(true);
     setTimeout(() => setCopiado(false), 2000);
   };
+
+  // Borra la clase y vuelve al historial de la asignatura
+  const manejarEliminar = () => {
+    setConfirmarEliminar(false);
+    eliminarClase(clase.id);
+    router.back();
+  };
+
+  // Si la clase ya no existe (por ejemplo, recién eliminada) no se muestra nada roto
+  if (!clase) {
+    return (
+      <SafeAreaView style={styles.safeArea} edges={['top', 'bottom', 'left', 'right']}>
+        <View style={styles.contenedor}>
+          <BarraSuperior textoVolver="Historial" />
+          <Aviso tipo="info" mensaje="Esta clase ya no existe o fue eliminada." />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  const fragmentos = transcripciones[clase.id] || [];
+  const deletreadas = clase.deletreadas || [];
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'bottom', 'left', 'right']}>
@@ -91,13 +114,33 @@ export default function TranscripcionGuardadaScreen() {
             Icono={Hand}
             onPress={() => router.push('/(tabs)/traducir')}
           />
-          <Boton
-            etiqueta="Copiar texto"
-            tipo="secundario"
-            Icono={Copy}
-            onPress={manejarCopiar}
-          />
+          <View style={styles.filaSecundaria}>
+            <Boton
+              etiqueta="Copiar"
+              tipo="secundario"
+              Icono={Copy}
+              onPress={manejarCopiar}
+              style={styles.flexUno}
+            />
+            <Boton
+              etiqueta="Eliminar"
+              tipo="peligro"
+              Icono={Trash2}
+              onPress={() => setConfirmarEliminar(true)}
+              style={styles.flexUno}
+            />
+          </View>
         </View>
+
+        <VentanaConfirmacion
+          visible={confirmarEliminar}
+          titulo="¿Eliminar esta transcripción?"
+          mensaje={`Se borrará la ${clase.fecha.toLowerCase()} y su texto. Esta acción no se puede deshacer.`}
+          textoConfirmar="Sí, eliminar"
+          textoCancelar="Cancelar"
+          onConfirmar={manejarEliminar}
+          onCancelar={() => setConfirmarEliminar(false)}
+        />
       </View>
     </SafeAreaView>
   );
@@ -127,4 +170,6 @@ const styles = StyleSheet.create({
   texto: { ...TIPOGRAFIA.cuerpo, color: COLORES.tinta },
   clave: { ...TIPOGRAFIA.cuerpoDestacado, color: COLORES.azul },
   acciones: { gap: 10, paddingTop: 12 },
+  filaSecundaria: { flexDirection: 'row', gap: 10 },
+  flexUno: { flex: 1 },
 });

@@ -2,7 +2,7 @@
  * PANTALLA 5 · ASIGNATURAS (inicio) · ruta "/(tabs)"
  * - Datos: asignaturas y clases desde el Context (useClases); nombre desde USUARIO.
  * - Interacción: tocar una tarjeta -> router.push a /asignatura/[id];
- *   "+ Agregar" -> <Link> a /nueva-asignatura; ajustes -> /ajustes.
+ *   botón "Agregar asignatura" -> <Link> a /nueva-asignatura; ajustes -> /ajustes.
  */
 import React from 'react';
 import { View, Text, FlatList, Pressable, StyleSheet } from 'react-native';
@@ -21,7 +21,9 @@ import { useClases } from '../../context/ClasesContext';
 export default function AsignaturasScreen() {
   const router = useRouter();
   // El contador de clases sale del estado compartido: sube al guardar una clase
-  const { asignaturas, clasesPorAsignatura } = useClases();
+  const { asignaturas, clasesPorAsignatura, ultimaAsignaturaId } = useClases();
+  // "Retomar…" abre la última asignatura que se tradujo (si todavía existe)
+  const ultima = asignaturas.find((a) => a.id === ultimaAsignaturaId);
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
@@ -61,10 +63,10 @@ export default function AsignaturasScreen() {
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Agregar asignatura"
-              style={({ pressed }) => [styles.botonAgregar, pressed && { backgroundColor: COLORES.azulSuave }]}
+              style={({ pressed }) => [styles.botonAgregar, pressed && styles.botonAgregarPresionado]}
             >
-              <Plus size={20} strokeWidth={2} color={COLORES.azul} />
-              <Text style={styles.textoAgregar}>Agregar</Text>
+              <Plus size={20} strokeWidth={2.5} color={COLORES.blanco} />
+              <Text style={styles.textoAgregar}>Agregar asignatura</Text>
             </Pressable>
           </Link>
         </View>
@@ -86,16 +88,18 @@ export default function AsignaturasScreen() {
           )}
         />
 
-        <View style={styles.accionInferior}>
-          <Boton
-            etiqueta="Retomar Tecnologías Web"
-            tipo="primario"
-            Icono={Hand}
-            onPress={() =>
-              router.push({ pathname: '/(tabs)/traducir', params: { asignaturaId: 'twm' } })
-            }
-          />
-        </View>
+        {ultima && (
+          <View style={styles.accionInferior}>
+            <Boton
+              etiqueta={`Retomar ${ultima.nombre}`}
+              tipo="primario"
+              Icono={Hand}
+              onPress={() =>
+                router.push({ pathname: '/(tabs)/traducir', params: { asignaturaId: ultima.id } })
+              }
+            />
+          </View>
+        )}
       </View>
     </SafeAreaView>
   );
@@ -138,22 +142,24 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 6,
+    marginBottom: 10,
   },
   rotulo: {
     ...TIPOGRAFIA.etiqueta,
     color: COLORES.tintaSuave,
   },
+  // Botón azul sólido para crear una asignatura nueva (blanco sobre azul: contraste 10:1)
   botonAgregar: {
     minHeight: MEDIDAS.altos.tactilMin, // 44 pt de área táctil
-    paddingHorizontal: 12,
+    paddingHorizontal: 16,
     borderRadius: MEDIDAS.radios.chip,
+    backgroundColor: COLORES.azul,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    marginRight: -12,
+    gap: 6,
   },
-  textoAgregar: { ...TIPOGRAFIA.cuerpoDestacado, color: COLORES.azul },
+  botonAgregarPresionado: { opacity: 0.85, transform: [{ scale: 0.97 }] },
+  textoAgregar: { ...TIPOGRAFIA.cuerpoDestacado, color: COLORES.blanco },
   lista: { gap: 12, paddingBottom: 16 },
   accionInferior: { paddingTop: 8 },
 });

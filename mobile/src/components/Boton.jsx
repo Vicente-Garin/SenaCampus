@@ -17,6 +17,12 @@ const ESTILOS_TIPO = {
     presionado: { fondo: COLORES.coralSuave, borde: COLORES.coral, texto: COLORES.tinta },
     deshabilitado: { fondo: COLORES.crema, borde: COLORES.borde, texto: COLORES.tintaSuave },
   },
+  // Acciones que borran datos (ej. Eliminar transcripción): rojo de error del UI Kit
+  peligro: {
+    normal: { fondo: COLORES.blanco, borde: COLORES.error, texto: COLORES.error },
+    presionado: { fondo: COLORES.errorSuave, borde: COLORES.error, texto: COLORES.error },
+    deshabilitado: { fondo: COLORES.crema, borde: COLORES.borde, texto: COLORES.tintaSuave },
+  },
   texto: {
     normal: { fondo: 'transparent', borde: null, texto: COLORES.azul },
     presionado: { fondo: COLORES.azulSuave, borde: null, texto: COLORES.azul },
@@ -28,7 +34,7 @@ const ESTILOS_TIPO = {
  * Botón reutilizable de SeñaCampus.
  * Props:
  *  - etiqueta: texto del botón
- *  - tipo: 'primario' | 'secundario' | 'texto'
+ *  - tipo: 'primario' | 'secundario' | 'peligro' | 'texto'
  *  - Icono: componente de lucide-react-native (opcional)
  *  - deshabilitado / cargando: estados del botón
  *  - onPress: función que se ejecuta al tocar

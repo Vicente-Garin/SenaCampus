@@ -25,6 +25,9 @@ export function ClasesProvider({ children }) {
   const [asignaturas, setAsignaturas] = useState(ASIGNATURAS);
   const [clasesPorAsignatura, setClasesPorAsignatura] = useState(CLASES_POR_ASIGNATURA);
   const [transcripciones, setTranscripciones] = useState(TRANSCRIPCIONES);
+  // Última asignatura que se abrió en Traducir: la usa el botón "Retomar…" de Asignaturas.
+  // Empieza en la de la última clase de ejemplo (Tecnologías Web y Móviles).
+  const [ultimaAsignaturaId, setUltimaAsignaturaId] = useState(ASIGNATURAS[0]?.id ?? null);
 
   /**
    * Guarda una clase nueva y devuelve su id.
@@ -55,6 +58,7 @@ export function ClasesProvider({ children }) {
       [asignaturaId]: [nueva, ...(prev[asignaturaId] || [])],
     }));
     setTranscripciones((prev) => ({ ...prev, [id]: fragmentos }));
+    setUltimaAsignaturaId(asignaturaId);
     return id;
   };
 
@@ -76,6 +80,24 @@ export function ClasesProvider({ children }) {
     return id;
   };
 
+  /**
+   * Elimina una clase guardada y su transcripción (pantalla Transcripción → Eliminar).
+   * Igual que al guardar, se crean objetos nuevos para que React redibuje el historial.
+   */
+  const eliminarClase = (id) => {
+    setClasesPorAsignatura((prev) => {
+      const siguiente = {};
+      for (const [asignaturaId, lista] of Object.entries(prev)) {
+        siguiente[asignaturaId] = lista.filter((c) => c.id !== id);
+      }
+      return siguiente;
+    });
+    setTranscripciones((prev) => {
+      const { [id]: _eliminada, ...resto } = prev;
+      return resto;
+    });
+  };
+
   // Busca una clase por su id en todas las asignaturas
   const buscarClase = (id) => {
     for (const lista of Object.values(clasesPorAsignatura)) {
@@ -86,7 +108,13 @@ export function ClasesProvider({ children }) {
   };
 
   return (
-    <ClasesContext.Provider value={{ asignaturas, agregarAsignatura, clasesPorAsignatura, transcripciones, guardarClase, buscarClase }}>
+    <ClasesContext.Provider
+      value={{
+        asignaturas, agregarAsignatura, clasesPorAsignatura, transcripciones,
+        guardarClase, eliminarClase, buscarClase,
+        ultimaAsignaturaId, setUltimaAsignaturaId,
+      }}
+    >
       {children}
     </ClasesContext.Provider>
   );
