@@ -7,8 +7,11 @@ const connectDB = async () => {
     if (!uri) throw new Error('Falta MONGO_URI en server/.env (ver server/.env.example)');
 
     // MongoDB Atlas (mongodb+srv://) necesita una consulta DNS de tipo SRV que el DNS por
-    // defecto de algunos Windows no le responde a Node; para Atlas se usan DNS públicos.
-    if (uri.startsWith('mongodb+srv://')) dns.setServers(['8.8.8.8', '1.1.1.1']);
+    // defecto de algunos Windows no le responde a Node; solo en Windows se usan DNS públicos.
+    // En Render (Linux) se deja el DNS del servidor, que sí responde y no bloquea nada.
+    if (uri.startsWith('mongodb+srv://') && process.platform === 'win32') {
+      dns.setServers(['8.8.8.8', '1.1.1.1']);
+    }
 
     const conn = await mongoose.connect(uri, { serverSelectionTimeoutMS: 15000 });
     console.log(`MongoDB conectado exitosamente: ${conn.connection.host} · base "${conn.connection.name}"`);
